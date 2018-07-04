@@ -15,8 +15,8 @@ void FWT(int a[],int n)
             for(int j=0;j<d;j++)    
             {    
                 int x=a[i+j],y=a[i+j+d];    
-                a[i+j]=(x+y)%MOD,a[i+j+d]=(x-y+MOD)%MOD;    
-                //xor:a[i+j]=x+y,a[i+j+d]=(x-y+MOD)%MOD;    
+                //xor:
+                a[i+j]=(x+y)%MOD,a[i+j+d]=(x-y+MOD)%MOD;     
                 //and:a[i+j]=x+y;    
                 //or:a[i+j+d]=x+y;    
             }    
@@ -29,8 +29,8 @@ void UFWT(int a[],int n)
             for(int j=0;j<d;j++)    
             {    
                 int x=a[i+j],y=a[i+j+d];    
-                a[i+j]=1LL*(x+y)*REV%MOD,a[i+j+d]=(1LL*(x-y)*REV%MOD+MOD)%MOD;    
-                //xor:a[i+j]=(x+y)/2,a[i+j+d]=(x-y)/2;    
+                //xor:
+                a[i+j]=1LL*(x+y)*REV%MOD,a[i+j+d]=(1LL*(x-y)*REV%MOD+MOD)%MOD;      
                 //and:a[i+j]=x-y;    
                 //or:a[i+j+d]=y-x;    
             }    

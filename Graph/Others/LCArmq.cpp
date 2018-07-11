@@ -31,7 +31,7 @@ int getMin(int x, int y)
 
 void rmq_init(int n)
 {
-    for(int i=0;i=n;++i) st[0][i]=i;
+    for(int i=0;i<n;++i) st[0][i]=i;
     for(int i=1;1<<i<n;++i)
         for(int j=0;j+(1<<i)-1<n;++j)
             st[i][j]=getMin(st[i-1][j],st[i-1][j+(1<<(i-1))]);

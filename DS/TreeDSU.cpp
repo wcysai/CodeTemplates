@@ -42,14 +42,14 @@ void dfs2(int v,int p,bool keep)
     {
         int to=G[v][i];
         if(to==p||to==wson) continue;
-        for(int j=st[to];j<ed[to];j++)
+        for(int j=st[to];j<=ed[to];j++)
             cnt[c[rev[j]]]++;
     }
     cnt[c[v]]++;
     //answer queries here
     if(!keep) 
     {
-        for(int j=st[v]lj<ed[v];j++)
+        for(int j=st[v];j<=ed[v];j++)
             cnt[c[rev[j]]]--;
     }
 }

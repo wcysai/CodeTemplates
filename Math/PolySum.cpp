@@ -44,7 +44,7 @@ namespace polysum
         ll ans=0;
         for(int i=0;i<=d;i++)
         {
-            ll t=g[i]*g[d-1]%MOD*p1[i]%MOD*p2[d-i]%MOD*a[i]%MOD;
+            ll t=g[i]*g[d-i]%MOD*p1[i]%MOD*p2[d-i]%MOD*a[i]%MOD;
             if((d-i)&1) ans=(ans-t+MOD)%MOD;
             else ans=(ans+t)%MOD;
         }
@@ -91,8 +91,8 @@ namespace polysum
 ll a[MAXN];
 int main()
 {
-    a[0]=1;a[1]=1;a[2]=100;
+    a[0]=0;a[1]=100;a[2]=0;
     polysum::init(1000);
-    printf("%lld\n",polysum::polysum(4,a,3));
+    printf("%lld\n",polysum::polysum(100,a,1));
     return 0;
 }

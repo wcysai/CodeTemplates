@@ -63,7 +63,7 @@ namespace polysum
         for(int i=1;i<=m+1;i++) a[i]=(a[i-1]+a[i])%MOD;
         return calcn(m+1,a,n-1);
     }
-    ll qpolysum(ll R,ll n,ll *a,ll m)
+    ll qpolysum(ll R,ll n,ll *a,ll m) //a[0]..a[m] \sum_{i=0}^{n-1} a[i]*R^i
     {
         if(R==1) return polysum(n,a,m);
         a[m+1]=calcn(m,a,m+1);
@@ -91,8 +91,8 @@ namespace polysum
 ll a[MAXN];
 int main()
 {
-    a[0]=0;a[1]=100;a[2]=0;
+    a[0]=1;a[1]=100;a[2]=0;
     polysum::init(1000);
-    printf("%lld\n",polysum::polysum(100,a,1));
+    printf("%lld\n",polysum::qpolysum(2,4,a,1));
     return 0;
 }

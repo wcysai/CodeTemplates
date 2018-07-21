@@ -1,110 +1,107 @@
-#include<bits/stdc++.h>
+#include<cstdio>
+#include<cmath>
+#include<iostream>
+#include<algorithm>
+#include<cstdlib>
+#include<cstring>
+#include<vector>
+#include<limits.h>
 #define MAXN 10005
+#define INF 1000000000
+#define MOD 1000000007
+#define F first
+#define S second
 using namespace std;
-struct edge{int to,length;};
+typedef long long ll;
+typedef pair<int,int> P;
+struct edge{int to,cost;};
 int N,K;
 vector<edge> G[MAXN];
 bool centroid[MAXN];
-int subtree_size[MAXN];
+int sz[MAXN],deep[MAXN],d[MAXN];
 int ans;
-int compute_subtree_size(int v,int p)
+P getroot(int v,int p,int t)//search_centroid
 {
-    int c=1;
-    for(int i=0;i<G[v].size();i++)
+    P res=P(INT_MAX,-1);
+	int m=0;
+    sz[v]=1;
+    for(int i=0;i<(int)G[v].size();i++)
     {
-        int w=G[v][i].to;
-        if(w==p||centroid[w]) continue;
-        c+=compute_subtree_size(G[v][i].to,v);
+        int to=G[v][i].to;
+        if(to==p||centroid[to]) continue;
+        res=min(res,getroot(to,v,t));
+        m=max(m,sz[to]);
+        sz[v]+=sz[to];
     }
-    subtree_size[v]=c;
-    return c;
-}
-pair<int,int> search_centroid(int v,int p,int t)
-{
-    pair<int,int> res=make_pair(INT_MAX,-1);
-    int s=1,m=0;
-    for(int i=0;i<G[v].size();i++)
-    {
-        int w=G[v][i].to;
-        if(w==p||centroid[w]) continue;
-        res=min(res,search_centroid(w,v,t));
-        m=max(m,subtree_size[w]);
-        s+=subtree_size[w];
-    }
-    m=max(m,t-s);
-    res=min(res,make_pair(m,v));
+    m=max(m,t-sz[v]);
+    res=min(res,P(m,v));
     return res;
 }
-void enumerate_paths(int v,int p,int d,vector<int> &ds)
+void getdeep(int v,int p)//enumerate path
 {
-    ds.push_back(d);
-    for(int i=0;i<G[v].size();i++)
+    deep[++deep[0]]=d[v];
+    for(int i=0;i<(int)G[v].size();i++)
     {
-        int w=G[v][i].to;
-        if(w==p||centroid[w]) continue;
-        enumerate_paths(w,v,d+G[v][i].length,ds);
+        int to=G[v][i].to;
+        if(to==p||centroid[to]) continue;
+        d[to]=d[v]+G[v][i].cost;
+        getdeep(to,v);
     }
 }
-int count_pairs(vector<int> &ds)
+int cal(int v,int cost)
 {
-    int res=0;
-    sort(ds.begin(),ds.end());
-    int j=ds.size();
-    for(int i=0;i<ds.size();i++)
+    d[v]=cost;deep[0]=0;
+    getdeep(v,0);
+    sort(deep+1,deep+deep[0]+1);
+    int l=1,r=deep[0],sum=0;
+    while(l<r)
     {
-        while(j>0&&ds[i]+ds[j-1]>K) j--;
-        res+=j-(j>i?1:0);
+        if(deep[l]+deep[r]<=K)
+        {
+            sum+=r-l;
+            l++;
+        }
+        else r--;
     }
-    return res/2;
+    return sum;
 }
-void solve_subproblem(int v)
+void solve(int v)
 {
-    compute_subtree_size(v,-1);
-    int s=search_centroid(v,-1,subtree_size[v]).second;
-    centroid[s]=true;
-    for(int i=0;i<G[s].size();i++)
+    ans+=cal(v,0);
+    centroid[v]=true;
+    for(int i=0;i<(int)G[v].size();i++)
     {
-        if(centroid[G[s][i].to]) continue;
-        solve_subproblem(G[s][i].to);
+        int to=G[v][i].to,cost=G[v][i].cost;
+        if(centroid[to]) continue;
+        ans-=cal(to,cost);
+        int rt=getroot(to,v,sz[to]).S;
+        solve(rt);
     }
-    vector<int> ds;
-    ds.push_back(0);
-    for(int i=0;i<G[s].size();i++)
-    {
-        if(centroid[G[s][i].to]) continue;
-        vector<int> tds;
-        enumerate_paths(G[s][i].to,s,G[s][i].length,tds);
-        ans-=count_pairs(tds);
-        ds.insert(ds.end(),tds.begin(),tds.end());
-    }
-    ans+=count_pairs(ds);
-    centroid[s]=false;
 }
-void solve()
+void ac()
 {
     ans=0;
-    solve_subproblem(0);
+    int rt=getroot(1,0,N).S;
+    solve(rt);
     printf("%d\n",ans);
 }
 int main()
 {
-    int M;
     while(scanf("%d%d",&N,&K)==2)
     {
         if(!N&&!K) break;
-        for(int i=0;i<N;i++)
+        for(int i=1;i<=N;i++)
             G[i].clear();
         for(int i=0;i<N-1;i++)
         {
             int x,y,z;
             scanf("%d%d%d",&x,&y,&z);
-            x--;
-            y--;
             G[x].push_back((edge){y,z});
             G[y].push_back((edge){x,z});
         }
         memset(centroid,false,sizeof(centroid));
-        solve();
+        ac();
     }
     return 0;
 }
+

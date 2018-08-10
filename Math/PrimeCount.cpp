@@ -8,6 +8,7 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 ll f[MAXN],g[MAXN],n,k; //f[i]:pi(n/i),g[i]:pi(i)
+
 ll PrimeCount(ll n)
 {
     ll i,j,m=0;

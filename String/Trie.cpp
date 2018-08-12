@@ -1,71 +1,38 @@
 #include<bits/stdc++.h>
-#define MAXN 50020
+#define MAXN 100005
+#define INF 1000000000
+#define MOD 1000000007
+#define F first
+#define S second
 using namespace std;
-struct trie
+typedef long long ll;
+typedef pair<int,int> P;
+int tot=1,n;
+int trie[MAXN][26];
+bool ed[MAXN];
+void insert(char *s,int rt)
 {
-    trie* next[26];
-};
-trie* thead;
-char str[MAXN][1001];
-inline trie*  newnode()
-{
-    trie* t;
-    t=(trie*)malloc(sizeof(trie));
-    memset(t,0,sizeof(trie));
-    return t;
-}
-void insert(char x[])
-{
-    int i;
-    trie* s=thead;
-    trie* t;
-    for(i=0;x[i];i++)
+    for(int i=0;s[i];i++)
     {
-        if(s->next[x[i]-'a']) {s=s->next[x[i]-'a'];}
-        else
-        {
-            t=newnode();
-            s->next[x[i]-'a']=t;
-            s=t;
-        }
+        int x=s[i]-'a';
+        if(trie[rt][x]==0) trie[rt][x]=++tot;
+        rt=trie[rt][x];
     }
-    return;
+    ed[rt]=true;
 }
-bool find(char x[])
+bool find(char *s,int rt)
 {
-    trie* s=thead;
-    int i;
-    for(i=0;x[i];i++)
+    for(int i=0;s[i];i++)
     {
-        if(s->next[x[i]-'a']==NULL) return false;
-        s=s->next[x[i]-'a'];
+        int x=s[i]-'a';
+        if(trie[rt][x]==0) return false;
+        rt=trie[rt][x];
     }
-    return true;
-}
-void deltrie(trie* s)
-{
-    int i;
-    for(i=0;i<26;i++)
-    {
-        if(s->next[i])
-        deltrie(s->next[i]);
-    }
-    free(s);
-    s=NULL;
+    return ed[rt];
 }
 int main()
 {
-    int i=0;
-    thead=newnode();
-    while(scanf("%s",str[i])==1)
-    {
-        if(str[i][0]=='1') break;
-        insert(str[i]);
-        i++;
-    }
-    char x[20];
-    while(scanf("%s",x)==1)
-        printf(find(x)?"yes\n":"no\n");
-    deltrie(thead);
+    memset(ed,false,sizeof(ed));
     return 0;
 }
+

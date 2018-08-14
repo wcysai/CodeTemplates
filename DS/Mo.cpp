@@ -11,45 +11,26 @@ int n,m,ans,block;
 bool cmp(query x,query y)
 {
     if(x.l/block!=y.l/block) return x.l/block<y.l/block;
-    return x.r<y.r^(x.l/block&1);
+    if(x.l/block&1) return x.r>y.r; else return x.r<y.r;
 }
 void add(int pos)
 {
     if(cnt[a[pos]]==a[pos]) ans--;
     cnt[a[pos]]++;
     if(cnt[a[pos]]==a[pos]) ans++;
-    return;
 }
 void del(int pos)
 {
     if(cnt[a[pos]]==a[pos]) ans--;
     cnt[a[pos]]--;
     if(cnt[a[pos]]==a[pos]) ans++;
-    return;
 }
 void update(int cl,int cr,int l,int r)
 {
-    while(cl<l)
-    {
-        del(cl);
-        cl++;
-    }
-    while(cl>l)
-    {
-        cl--;
-        add(cl);
-    }
-    while(cr>r)
-    {
-        del(cr);
-        cr--;
-    }
-    while(cr<r)
-    {
-        cr++;
-        add(cr);
-    }
-    return;
+    while(cr<r) add(++cr);
+    while(cl>l) add(--cl);
+    while(cl<l) del(cl++);
+    while(cr>r) del(cr--);
 }
 int main()
 {

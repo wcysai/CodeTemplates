@@ -1,99 +1,149 @@
 #include<bits/stdc++.h>
-#define MAXN 100005
+#define MAXN 1000005
 #define INF 1000000000
 #define MOD 1000000007
 #define F first
 #define S second
 using namespace std;
 typedef long long ll;
-using namespace std;
-struct Node
-{   int sz,label,f;
-    Node *p,*ch[2];
-    Node(int v=0) {p=ch[0]=ch[1]=0;label=v;f=1; }
-};
-typedef Node* pnode;
-int sz(pnode t)
+typedef pair<int,int> P;
+int ch[MAXN][2],f[MAXN],size[MAXN],cnt[MAXN],key[MAXN];
+int sz,root;
+inline void clear(int x)
 {
-    return t?t->sz:0;
+    ch[x][0]=ch[x][1]=f[x]=size[x]=cnt[x]=key[x]=0;
 }
-void pushup(Node *x)
+inline bool get(int x)
 {
-    if(!x) return;
-    x->sz=x->f+sz(x->ch[0])+sz(x->ch[1]);
+    return ch[f[x]][1]==x;
 }
-void rot(Node *x)
+inline void pushup(int x)
 {
-    Node *y,*z;
-    y=x->p,z=y->p;
-    int xp=(x==y->ch[0])?0:1,yp=(z)?((y==z->ch[0])?0:1):-1;
-    if((y->ch[xp]=x->ch[1^xp]))y->ch[xp]->p=y;
-    x->ch[1^xp]=y,y->p=x;
-    if((x->p=z))z->ch[yp]=x;
-    pushup(y);
-}
- 
-void splay(Node *x)
-{
-    if(!x)return;
-    while (x->p)rot(x);
-    pushup(x);
-}
-
-void merge (pnode &c,Node *L,Node *R)
-{
-    if(!L||!R){ c=(!L)?R:L,pushup(c);return;}
-    c=L;
-    while (c->ch[1])c=c->ch[1];
-    splay(c);c->ch[1]=R;if(R) R->p=c;
-    pushup(c);
-}
-Node *find (Node *T,int k,Node *p=0)
-{
-    if(!T)return p;
-    return (T->label==k)?T:(T->label>k)?find(T->ch[0],k,T):find(T->ch[1],k,T);
-}
-void split (pnode T,pnode & L,pnode & R ,int x)
-{
-    if(!T){L=R=NULL;return;}
-    T=find(T,x);splay(T);
-    if(T->label>x)L=T->ch[0],T->ch[0]=0,R=T;
-    else R=T->ch[1],T->ch[1]=0,L=T;
-    if(L)L->p=0;if(R)R->p=0;
-    pushup(L);pushup(R);
-}
- 
-void insert(pnode &T,int x)
-{
-    pnode n=new Node(x);
-    pnode l=0,r=0;
-    if(T) 
+    if (x)
     {
-        T=find(T,x);splay(T);
-        if(T->label==x)T->f++;
+        size[x]=cnt[x];
+        if (ch[x][0]) size[x]+=size[ch[x][0]];
+        if (ch[x][1]) size[x]+=size[ch[x][1]];
+    }
+}
+inline void rotate(int x)
+{
+    int old=f[x],oldf=f[old],whichx=get(x);
+    ch[old][whichx]=ch[x][whichx^1]; f[ch[old][whichx]]=old;
+    ch[x][whichx^1]=old; f[old]=x;
+    f[x]=oldf;
+    if (oldf) ch[oldf][ch[oldf][1]==old]=x;
+    pushup(old); pushup(x);
+}
+inline void splay(int x,int goal)
+{
+    for(int fa;(fa=f[x])!=goal;rotate(x))
+        if(f[fa]!=goal) rotate((get(x)==get(fa))?fa:x);
+    if(goal==0) root=x;
+}
+inline void insert(int x)
+{
+    if (root==0){sz++; ch[sz][0]=ch[sz][1]=f[sz]=0; root=sz; size[sz]=cnt[sz]=1; key[sz]=x; return;}
+    int now=root,fa=0;
+    while(1)
+    {
+        if (x==key[now])
+        {
+            cnt[now]++; pushup(now); pushup(fa); splay(now,0); break;
+        }
+        fa=now;
+        now=ch[now][key[now]<x];
+        if (now==0)
+        {
+            sz++;
+            ch[sz][0]=ch[sz][1]=0;
+            f[sz]=fa;
+            size[sz]=cnt[sz]=1;
+            ch[fa][key[fa]<x]=sz;
+            key[sz]=x;
+            pushup(fa);
+            splay(sz,0);
+            break;
+        }
+    }
+}
+inline int find(int x)
+{
+    int now=root,ans=0;
+    while(1)
+    {
+        if(x<key[now]) now=ch[now][0];
         else
         {
-            split(T,l,r,x),n->ch[0]=l,n->ch[1]=r;
-            if(l)l->p=n;
-            if(r)r->p=n;
-            T=n;
+            ans+=(ch[now][0]?size[ch[now][0]]:0);
+            if (x==key[now]){splay(now,0); return ans+1;}
+            ans+=cnt[now];
+            now=ch[now][1];
         }
     }
-    if(!T) T=n;
-    pushup(T);
 }
-void erase(pnode &n,int k)
+inline int findx(int x)
 {
-    if(!n) return;
-    n=find(n,k);splay(n);
-    if(n->label==k)
+    int now=root;
+    while(1)
     {
-        n->f--;
-        if(!n->f)
+        if (ch[now][0]&&x<=size[ch[now][0]]) now=ch[now][0];
+        else
         {
-            if(n->ch[0]) n->ch[0]->p=0;
-            if(n->ch[1]) n->ch[1]->p=0;
-            merge(n,n->ch[1],n->ch[0]);
+            int temp=(ch[now][0]?size[ch[now][0]]:0)+cnt[now];
+            if (x<=temp) return key[now];
+            x-=temp; now=ch[now][1];
         }
     }
 }
+inline int pre()
+{
+    int now=ch[root][0];
+    while (ch[now][1]) now=ch[now][1];
+    return now;
+}
+inline int next()
+{
+    int now=ch[root][1];
+    while (ch[now][0]) now=ch[now][0];
+    return now;
+}
+inline void del(int x)
+{
+    int whatever=find(x);
+    if (cnt[root]>1){cnt[root]--; pushup(root); return;}
+    if (!ch[root][0]&&!ch[root][1]) {clear(root); root=0; return;}
+    if (!ch[root][0])
+    { 
+        int oldroot=root; root=ch[root][1]; f[root]=0; clear(oldroot); return;
+    }
+    else if (!ch[root][1])
+    {
+        int oldroot=root; root=ch[root][0]; f[root]=0; clear(oldroot); return;
+    }
+    int leftbig=pre(),oldroot=root;
+    splay(leftbig,0);
+    ch[root][1]=ch[oldroot][1];
+    f[ch[oldroot][1]]=root;
+    clear(oldroot);
+    pushup(root);
+}
+int main()
+{
+    int n,opt,x;
+    scanf("%d",&n);
+    for (int i=1;i<=n;++i)
+    {
+        scanf("%d%d",&opt,&x);
+        switch(opt)
+        {
+            case 1: insert(x); break;
+            case 2: del(x); break;
+            case 3: printf("%d\n",find(x)); break;
+            case 4: printf("%d\n",findx(x)); break;
+            case 5: insert(x); printf("%d\n",key[pre()]); del(x); break;
+            case 6: insert(x); printf("%d\n",key[next()]); del(x); break;
+        }
+    }
+}
+

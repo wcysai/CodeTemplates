@@ -63,21 +63,5 @@ int dis(int u,int v)
 }
 int main()
 {
-    scanf("%d%d",&N,&M);
-    for(int i=0;i<M;i++)
-    {
-        int x,y;
-        scanf("%d%d",&x,&y);
-        G[x].push_back(y);
-        G[y].push_back(x);
-    }
-    init(N);
-    scanf("%d",&Q);
-    while(Q--)
-    {
-        int x,y;
-        scanf("%d%d",&x,&y);
-        printf("%d\n",lca(x,y));
-    }
     return 0;
 }

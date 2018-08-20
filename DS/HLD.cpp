@@ -67,7 +67,7 @@ vector<int> G[MAXN];
 void dfs1(int v,int p,int d)
 {
     dep[v]=d;pa[v]=p;sz[v]=1;
-    for(int i=0;i<G[v].size();i++)
+    for(int i=0;i<(int)G[v].size();i++)
     {
         int to=G[v][i];
         if(to==p) continue;
@@ -82,7 +82,7 @@ void dfs2(int v,int p,int num)
     spos[v]=++tot;
     tpos[tot]=v;
     if(wson[v]) dfs2(wson[v],v,num);
-    for(int i=0;i<G[v].size();i++)
+    for(int i=0;i<(int)G[v].size();i++)
     {
         int to=G[v][i];
         if(to==p||to==wson[v]) continue;

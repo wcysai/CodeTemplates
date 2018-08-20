@@ -82,18 +82,13 @@ inline int find(int x)
         }
     }
 }
-inline int findx(int x)
+inline int findx(int now,int k)
 {
-    int now=root;
-    while(1)
+    while(now)
     {
-        if (ch[now][0]&&x<=size[ch[now][0]]) now=ch[now][0];
-        else
-        {
-            int temp=(ch[now][0]?size[ch[now][0]]:0)+cnt[now];
-            if (x<=temp) return key[now];
-            x-=temp; now=ch[now][1];
-        }
+        if(k<=size[ch[now][0]]) now=ch[now][0];
+        else if(k<=size[ch[now][0]]+cnt[now]) return key[now];
+        else k-=size[ch[now][0]]+cnt[now],now=ch[now][1];
     }
 }
 inline int pre()
@@ -140,7 +135,7 @@ int main()
             case 1: insert(x); break;
             case 2: del(x); break;
             case 3: printf("%d\n",find(x)); break;
-            case 4: printf("%d\n",findx(x)); break;
+            case 4: printf("%d\n",findx(root,x)); break;
             case 5: insert(x); printf("%d\n",key[pre()]); del(x); break;
             case 6: insert(x); printf("%d\n",key[next()]); del(x); break;
         }

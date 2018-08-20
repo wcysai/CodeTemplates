@@ -1,12 +1,5 @@
-#include<cstdio>
-#include<cmath>
-#include<iostream>
-#include<algorithm>
-#include<cstdlib>
-#include<cstring>
-#include<vector>
-#include<limits.h>
-#define MAXN 10005
+#include<bits/stdc++.h>
+#define MAXN 100005
 #define INF 1000000000
 #define MOD 1000000007
 #define F first

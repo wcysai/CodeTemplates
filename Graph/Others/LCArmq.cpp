@@ -1,20 +1,25 @@
 #include<bits/stdc++.h>
-#define MAXV 100005
-#define MAXLOGV 32
+#define MAXN 100005
+#define MAXLOGN 22
+#define INF 1000000000
+#define MOD 1000000007
+#define F first
+#define S second
 using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
 int N,M,Q;
-int st[MAXLOGV][MAXV];
-vector<int> G[MAXV];
-int root;
-int vs[MAXV*2-1];
-int depth[MAXV*2-1];
-int id[MAXV];
+int st[MAXLOGN][2*MAXN];
+vector<int> G[MAXN];
+int vs[MAXN*2-1];
+int depth[MAXN*2-1];
+int id[MAXN];
 void dfs(int v,int p,int d,int &k)
 {
     id[v]=k;
     vs[k]=v;
     depth[k++]=d;
-    for(int i=0;i<G[v].size();i++)
+    for(int i=0;i<(int)G[v].size();i++)
     {
         if(G[v][i]!=p)
         {
@@ -31,15 +36,15 @@ int getMin(int x, int y)
 
 void rmq_init(int n)
 {
-    for(int i=0;i<n;++i) st[0][i]=i;
+    for(int i=1;i<=n;++i) st[0][i]=i;
     for(int i=1;1<<i<n;++i)
-        for(int j=0;j+(1<<i)-1<n;++j)
+        for(int j=1;j+(1<<i)-1<=n;++j)
             st[i][j]=getMin(st[i-1][j],st[i-1][j+(1<<(i-1))]);
 }
 void init(int V)
 {
     int k=0;
-    dfs(root,-1,0,k);
+    dfs(1,0,0,k);
     rmq_init(V*2-1);
 }
 int query(int l, int r)
@@ -66,7 +71,6 @@ int main()
         G[x].push_back(y);
         G[y].push_back(x);
     }
-    root=0;
     init(N);
     scanf("%d",&Q);
     while(Q--)

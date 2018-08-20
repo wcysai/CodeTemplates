@@ -8,7 +8,7 @@
 using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
-int N,M,Q;
+int n,q;
 int st[MAXLOGN][2*MAXN];
 vector<int> G[MAXN];
 int vs[MAXN*2-1];

@@ -35,7 +35,7 @@ inline void rotate(int x)
     if (oldf) ch[oldf][ch[oldf][1]==old]=x;
     pushup(old); pushup(x);
 }
-inline void splay(int x,int goal)
+inline void splay(int x,int goal=0)
 {
     for(int fa;(fa=f[x])!=goal;rotate(x))
         if(f[fa]!=goal) rotate((get(x)==get(fa))?fa:x);
@@ -49,7 +49,7 @@ inline void insert(int x)
     {
         if (x==key[now])
         {
-            cnt[now]++; pushup(now); pushup(fa); splay(now,0); break;
+            cnt[now]++; pushup(now); pushup(fa); splay(now); break;
         }
         fa=now;
         now=ch[now][key[now]<x];
@@ -62,7 +62,7 @@ inline void insert(int x)
             ch[fa][key[fa]<x]=sz;
             key[sz]=x;
             pushup(fa);
-            splay(sz,0);
+            splay(sz);
             break;
         }
     }
@@ -76,7 +76,7 @@ inline int find(int x)
         else
         {
             ans+=(ch[now][0]?size[ch[now][0]]:0);
-            if (x==key[now]){splay(now,0); return ans+1;}
+            if (x==key[now]){splay(now); return ans+1;}
             ans+=cnt[now];
             now=ch[now][1];
         }
@@ -117,7 +117,7 @@ inline void del(int x)
         int oldroot=root; root=ch[root][0]; f[root]=0; clear(oldroot); return;
     }
     int leftbig=pre(),oldroot=root;
-    splay(leftbig,0);
+    splay(leftbig);
     ch[root][1]=ch[oldroot][1];
     f[ch[oldroot][1]]=root;
     clear(oldroot);

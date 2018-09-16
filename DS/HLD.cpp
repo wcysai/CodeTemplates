@@ -91,7 +91,9 @@ void dfs2(int v,int p,int num)
 }
 void init()
 {
-    tot=0;dfs1(1,1,1);
+    tot=0;
+    memset(wson,0,sizeof(wson));//important when multiple test cases!!!
+    dfs1(1,1,1);
     dfs2(1,0,1);
     tree.build(1,1,n);
 }

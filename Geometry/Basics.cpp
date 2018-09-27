@@ -39,6 +39,10 @@ public:
     {
         return Point(_st.x - _se.x, _st.y - _se.y);
     }
+    double operator ^(const Point &b)const
+    {
+        return x*b.y - y*b.x;
+    }
     //点位置相同(double类型)
     bool operator == (const Point &_off)const
     {
@@ -85,7 +89,8 @@ public:
     //排序用
     bool operator < (const Line &ta)const
     {
-        return angle<ta.angle;
+        if(angle!=ta.angle) return angle<ta.angle;
+        return ((s - ta.s)^(ta.e - ta.s)) < 0;
     }
     //向量与向量的叉乘
     friend double operator / ( const Line &_st, const  Line &_se)

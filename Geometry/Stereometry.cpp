@@ -126,6 +126,11 @@ public:
         return true;
     }
 };
+bool point_on_plane(Point &pt, Plane &p)
+{
+    Line l(p.p,pt);l.pton();
+    return (sgn(l*p.norm,0)==0);
+}
 db dist_to_plane(Point &pt, Plane &p)
 {
     db A=p.A,B=p.B,C=p.C,D=p.D;

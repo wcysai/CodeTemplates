@@ -25,129 +25,216 @@ public:
     db x,y,z;
     Point(){}
     Point(db tx,db ty,db tz) {x=tx,y=ty,z=tz;}
-    bool operator<(const Point &rhs) const
-    {
-        return x<rhs.x||(x==rhs.x&&y<rhs.y)||(x==rhs.x&&y==rhs.y&&z<rhs.z);
-    }
-    friend Point operator*(const Point &lhs,const db rhs) {return Point(lhs.x*rhs,lhs.y*rhs,lhs.z*rhs);}
-    friend Point operator*(const db lhs,const Point &rhs) {return Point(lhs*rhs.x,lhs*rhs.y,lhs*rhs.z);}
-    friend Point operator/(const Point &lhs,const db rhs) {return Point(lhs.x/rhs,lhs.y/rhs,lhs.z/rhs);}
-    friend Point operator+(const Point &lhs,const Point &rhs)
-    {
-        return Point(lhs.x+rhs.x,lhs.y+rhs.y,lhs.z+rhs.z);
-    }
-    friend Point operator - (const Point &lhs,const Point &rhs)
-    {
-        return Point(lhs.x-rhs.x,lhs.y-rhs.y,lhs.z-rhs.z);
-    }
-    bool operator == (const Point &rhs)const
-    {
-        return sgn(x,rhs.x)==0&&sgn(y,rhs.y)==0&&sgn(z,rhs.z)==0;
-    }
+    bool operator<(Point p) {return tie(x,y,z)<tie(p.x,p.y,p.z);} 
+    Point operator+(Point p) {return {x+p.x,y+p.y,z+p.z};}
+    Point operator-(Point p) {return {x-p.x,y-p.y,z-p.z};}
+    Point operator*(db d) {return {x*d,y*d,z*d};}
+    Point operator/(db d) {return {x/d,y/d,z/d};}
+    bool operator==(Point p) {return tie(x,y,z)==tie(p.x,p.y,p.z);}
+    bool operator!=(Point p) {return !operator==(p);}
 };
+Point zero{0,0,0};
 
-db dot(const Point &p, const Point &q)
+db operator|(Point p,Point q) {return p.x*q.x+p.y*q.y+p.z*q.z;}
+
+db abs2(Point p){return p|p;}
+
+db abs(Point p) {return sqrt(abs2(p));}
+
+Point unit(Point p) {return p/abs(p);}
+
+db angle(Point p,Point q)
 {
-    return p.x*q.x+p.y*q.y+p.z*q.z;
+    db costheta=(p|q)/abs(p)/abs(q);
+    return acos(max((db)-1.0,min((db)1.0,costheta)));
 }
-db dis2(const Point &p, const Point &q)
+
+Point operator*(Point p,Point q)
 {
-    return (p.x-q.x)*(p.x-q.x)+(p.y-q.y)*(p.y-q.y)+(p.z-q.z)*(p.z-q.z);
+    return {p.y*q.z-p.z*q.y,p.z*q.x-p.x*q.z,p.x*q.y-p.y*q.x};
 }
-db dis(const Point &p,const Point &q)
+
+db orient(Point p,Point q,Point r,Point s)
 {
-    return sqrt((p.x-q.x)*(p.x-q.x)+(p.y-q.y)*(p.y-q.y)+(p.z-q.z)*(p.z-q.z));
+    return (q-p)*(r-p)|(s-p);
 }
-class Line
+
+db orient_by_normal(Point p,Point q,Point r,Point n)
 {
-public:
-    Point s,e;
-    db x,y,z;
-    Line(){}
-    Line(Point ts,Point te):s(ts),e(te){}
-    Line(db _x,db _y,db _z):x(_x),y(_y),z(_z){}
-
-    friend Line operator +(const Line &p,const Line &q) 
-    {
-        return Line(p.x+q.x,p.y+q.y,p.z+q.z);
-    }
-
-    friend Line operator -(const Line &p,const Line &q) 
-    {
-        return Line(p.x-q.x,p.y-q.y,p.z-q.z);
-    }
-
-    friend Line operator /(const Line &p,const Line &q) //xmult
-    {
-        return Line(p.y*q.z-p.z*q.y,p.z*q.x-p.x*q.z,p.x*q.y-p.y*q.x);
-    }
-
-    friend double operator *(const Line &p,const Line &q) //dot
-    {
-        return p.x*q.x+p.y*q.y+p.z*q.z;
-    }
-
-    bool pton()
-    {
-        x=e.x-s.x;y=e.y-s.y;z=e.z-s.z;
-        return true;
-    }
-
-    db length()
-    {
-        return sqrt(x*x+y*y+z*z);
-    }
-};
-db mixed(Line &p, Line &q, Line &r)
-{
-    return p.x*(q.y*r.z-q.z*r.y)-p.y*(q.x*r.z-q.z*r.x)+p.z*(q.x*r.y-q.y*r.x);
+    return (q-p)*(r-p)|n;
 }
-db get_angle(Line &p, Line &q)
-{
-    return atan2((p/q).length(),p*q);
-}
+
+
 class Plane
 {
 public:
-    Point p,q,r;
-    db A,B,C,D;  
-    Line norm;
-    Plane(){}
-    Plane(Point tp,Point tq,Point tr):p(tp),q(tq),r(tr){}
-    Plane(db _A,db _B,db _C, db _D):A(_A),B(_B),C(_C),D(_D){}
+    Point n; db d;
+    Plane(Point n, db d): n(n),d(d){}
+    Plane(Point n, Point p): n(n),d(n|p){}
+    Plane(Point p,Point q,Point r): Plane((q-p)*(r-p),p){}
+    db side(Point p) {return (n|p)-d;}
+    db dist(Point p) {return abs(side(p))/abs(n);}
+    Plane translate(Point p) {return {n,d+(n|p)};};
+    Plane shiftup(db dist) {return {n,d+dist*abs(n)};};
+    Point proj(Point p) {return p-n*side(p)/abs2(n);};
+    Point refl(Point p) {return p-n*2*side(p)/abs2(n);};
+};
 
-    bool pton()
+class Line
+{
+public:
+    Point d,o;
+    Line(Point p,Point q):d(q-p),o(p){}
+    Line(Plane p1,Plane p2)
     {
-        Line lp(p,q),lq(p,r);
-        lp.pton();lq.pton();
-        norm=lp/lq;
-        A=norm.x;B=norm.y;C=norm.z;
-        D=A*p.x+B*p.y+C*p.z;
-        return true;
+        d=p1.n*p2.n;
+        o=(p2.n*p1.d-p1.n*p2.d)*d/abs2(d);
+    };
+    db dist2(Point p) {return abs2(d*(p-o)/abs2(d));};
+    db dist(Point p) {return sqrt(dist2(p));};
+    bool cmpproj(Point p,Point q) {return (d|p)<(d|q);};
+    Point proj(Point p) {return o+d*(d|(p-o))/abs2(d);};
+    Point refl(Point p) {return proj(p)*2-p;};
+    Point inter(Plane p) {return o-d*p.side(o)/(d|p.n);}
+};
+
+db dist(Line l1,Line l2)
+{
+    Point n=l1.d*l2.d;
+    if(n==zero) return l1.dist(l2.o);
+    return abs((l2.o-l1.o)|n)/abs(n);
+}
+
+Point closestonl1(Line l1,Line l2)
+{
+    Point n2=l2.d*(l1.d*l2.d);
+    return l1.o+l1.d*((l2.o-l1.o)|n2)/(l1.d|n2);
+}
+
+db angle(Plane p1,Plane p2)
+{
+    return angle(p1.n,p2.n);
+}
+
+bool is_parallel(Plane p1,Plane p2)
+{
+    return p1.n*p2.n==zero;
+}
+
+bool is_perpendicular(Plane p1,Plane p2)
+{
+    return (p1.n|p2.n)==0;
+}
+
+db angle(Line l1,Line l2)
+{
+    return angle(l1.d,l2.d);
+}
+
+bool is_parallel(Line l1,Line l2)
+{
+    return l1.d*l2.d==zero;
+}
+
+bool is_perpendicular(Line l1,Line l2)
+{
+    return (l1.d|l2.d)==0;
+}
+
+db angle(Plane p,Line l)
+{
+    return PI/2-angle(p.n,l.d);
+}
+
+bool is_parallel(Plane p,Line l)
+{
+    return (p.n|l.d)==0;
+}
+
+bool is_perpendicular(Plane p,Line l)
+{
+    return p.n*l.d==zero;
+}
+
+Line perpthrough(Plane p,Point o) {return Line(o,o+p.n);}
+
+Plane perpthrough(Line l,Point o) {return Plane(l.d,o);}
+
+Point vectorArea2(vector<Point> p)
+{
+    Point S=zero;
+    for(int i=0,n=p.size();i<n;i++) S=S+p[i]*p[(i+1)%n];
+    return S;
+}
+
+db area(vector<Point> p) {return abs(vectorArea2(p))/2.0;}
+
+class Polyhedron
+{
+public:
+    vector<vector<Point> > faces;
+
+    void clear(){faces.clear();}
+
+    db surface_area()
+    {
+        db ans=0.0;
+        for(auto f:faces) ans+=area(f);
+        return ans;
+    }
+
+    struct edge{int v;bool same;};
+    void reorient()
+    {
+        int n=faces.size();
+        vector<vector<edge> > G(n);
+        map<pair<Point,Point>, int> es;
+        for(int u=0;u<n;u++)
+        {
+            for(int i=0,m=(int)faces[u].size();i<m;i++)
+            {
+                Point p=faces[u][i],q=faces[u][(i+1)%m];
+                if(es.count({p,q})) 
+                {
+                    int v=es[{p,q}];
+                    G[u].push_back({v,true});G[v].push_back({u,true});
+                }
+                else if(es.count({q,p}))
+                {
+                    int v=es[{q,p}];
+                    G[u].push_back({v,false});G[v].push_back({u,false});
+                }
+                else es[{p,q}]=u;
+            }
+        }
+        vector<bool> vis(n,false),flip(n);
+        flip[0]=false;
+        queue<int> q;q.push(0);
+        while(!q.empty())
+        {
+            int u=q.front();q.pop();
+            for(edge e:G[u])
+            {
+                if(!vis[e.v])
+                {
+                    vis[e.v]=true;
+                    flip[e.v]=flip[u]^e.same;
+                    q.push(e.v);
+                }
+            }
+        }
+        for(int u=0;u<n;u++)
+            if(flip[u])
+                reverse(faces[u].begin(),faces[u].end());
+    }
+    
+    db volume()
+    {
+        double ans=0.0;
+        for(auto f:faces) ans+=(vectorArea2(f)|f[0]);
+        return abs(ans/6.0);
     }
 };
-bool point_on_plane(Point &pt, Plane &p)
-{
-    Line l(p.p,pt);l.pton();
-    return (sgn(l*p.norm,0)==0);
-}
-db dist_to_plane(Point &pt, Plane &p)
-{
-    db A=p.A,B=p.B,C=p.C,D=p.D;
-    return (A*pt.x+B*pt.y+C*pt.z+D)/sqrt(A*A+B*B+C*C);
-}
-db volume(Point &pt, Plane &p)
-{
-    Line lp(p.p,pt),lq(p.q,pt),lr(p.r,pt);
-    lp.pton();lq.pton();lr.pton();
-    db v=mixed(lp,lq,lr);return abs(v)/6.0;
-}
-Point line_plane_intersection(Line &l, Plane &p)
-{
-    Point A=l.s,B=l.e;
-    db vA=volume(A,p),vB=volume(B,p);
-    return (A*vB+B*vA)/(vA+vB);
-}
 db point_to_segment(Point &p1,Point &p2,Point &p3)
 {
     db l=0.0,r=1.0,ans1,ans2;
@@ -155,8 +242,8 @@ db point_to_segment(Point &p1,Point &p2,Point &p3)
     {
         db dis=(r-l)/3.0;
         db lmid=l+dis,rmid=l+2.0*dis;
-        Point Q=p2+lmid*(p3-p2),R=p2+rmid*(p3-p2);
-        ans1=dis2(p1,Q);ans2=dis2(p1,R);
+        Point Q=p2+((p3-p2)*lmid),R=p2+((p3-p2)*rmid);
+        ans1=p1|Q;ans2=p1|R;
         if(ans1<ans2) r=rmid; else l=lmid;
     }
     return sqrt(min(ans1,ans2));
@@ -168,7 +255,7 @@ db segment_dist(Point &p1, Point &p2, Point &p3, Point &p4)
     {
         db dis=(r-l)/3.0;
         db lmid=l+dis,rmid=l+2.0*dis;
-        Point p=p1+lmid*(p2-p1),q=p1+rmid*(p2-p1);
+        Point p=p1+((p2-p1)*lmid),q=p1+((p2-p1)*rmid);
         ans1=point_to_segment(p,p3,p4);ans2=point_to_segment(q,p3,p4);
         if(ans1<ans2) r=rmid; else l=lmid;
     }

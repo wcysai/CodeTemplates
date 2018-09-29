@@ -6,11 +6,12 @@
 #define F first
 #define S second
 using namespace std;
-typedef long double db;
+typedef long double T;
+typedef double db;
 typedef long long ll;
 typedef pair<int,int> P;
-const db PI=acos(-1.0);
-const db eps=1e-10;
+const T PI=acos(-1.0);
+const T eps=1e-10;
 
 int sgn( double ta, double tb)
 {
@@ -22,62 +23,43 @@ int sgn( double ta, double tb)
 class Point
 {
 public:
-    db x,y,z;
+    T x,y,z;
     Point(){}
-    Point(db tx,db ty,db tz) {x=tx,y=ty,z=tz;}
-    bool operator<(Point p) {return tie(x,y,z)<tie(p.x,p.y,p.z);} 
+    Point(T tx,T ty,T tz) {x=tx,y=ty,z=tz;}
     Point operator+(Point p) {return {x+p.x,y+p.y,z+p.z};}
     Point operator-(Point p) {return {x-p.x,y-p.y,z-p.z};}
-    Point operator*(db d) {return {x*d,y*d,z*d};}
-    Point operator/(db d) {return {x/d,y/d,z/d};}
+    Point operator*(T d) {return {x*d,y*d,z*d};}
+    Point operator/(T d) {return {x/d,y/d,z/d};}
     bool operator==(Point p) {return tie(x,y,z)==tie(p.x,p.y,p.z);}
     bool operator!=(Point p) {return !operator==(p);}
+    bool operator<(Point p) {return tie(x,y,z)<tie(p.x,p.y,p.z);}
 };
 Point zero{0,0,0};
-
-db operator|(Point p,Point q) {return p.x*q.x+p.y*q.y+p.z*q.z;}
-
-db abs2(Point p){return p|p;}
-
-db abs(Point p) {return sqrt(abs2(p));}
-
-Point unit(Point p) {return p/abs(p);}
-
-db angle(Point p,Point q)
+T operator|(Point v, Point w) {return v.x*w.x + v.y*w.y + v.z*w.z;}
+T sq(Point v) {return v|v;}
+db abs(Point v) {return sqrt(sq(v));}
+Point unit(Point v) {return v/abs(v);}
+db angle(Point v, Point w) 
 {
-    db costheta=(p|q)/abs(p)/abs(q);
-    return acos(max((db)-1.0,min((db)1.0,costheta)));
+    db cosTheta=(v|w)/abs(v)/abs(w);
+    return acos(max(-1.0,min(1.0,cosTheta)));
 }
-
-Point operator*(Point p,Point q)
-{
-    return {p.y*q.z-p.z*q.y,p.z*q.x-p.x*q.z,p.x*q.y-p.y*q.x};
-}
-
-db orient(Point p,Point q,Point r,Point s)
-{
-    return (q-p)*(r-p)|(s-p);
-}
-
-db orient_by_normal(Point p,Point q,Point r,Point n)
-{
-    return (q-p)*(r-p)|n;
-}
-
-
-class Plane
+Point operator*(Point v,Point w) {return {v.y*w.z-v.z*w.y,v.z*w.x-v.x*w.z,v.x*w.y-v.y*w.x};}
+T orient(Point p, Point q, Point r, Point s) {return (q-p)*(r-p)|(s-p);}
+T orientByNormal(Point p, Point q, Point r, Point n) {return (q-p)*(r-p)|n;}
+class Plane 
 {
 public:
-    Point n; db d;
-    Plane(Point n, db d): n(n),d(d){}
-    Plane(Point n, Point p): n(n),d(n|p){}
-    Plane(Point p,Point q,Point r): Plane((q-p)*(r-p),p){}
-    db side(Point p) {return (n|p)-d;}
+    Point n; T d;
+    Plane(Point n,T d) : n(n), d(d) {}
+    Plane(Point n, Point p) : n(n), d(n|p) {}
+    Plane(Point p, Point q, Point r) : Plane((q-p)*(r-p), p) {}
+    T side(Point p) {return (n|p)-d;}
     db dist(Point p) {return abs(side(p))/abs(n);}
-    Plane translate(Point p) {return {n,d+(n|p)};};
-    Plane shiftup(db dist) {return {n,d+dist*abs(n)};};
-    Point proj(Point p) {return p-n*side(p)/abs2(n);};
-    Point refl(Point p) {return p-n*2*side(p)/abs2(n);};
+    Plane translate(Point t) {return {n,d+(n|t)};}
+    Plane shiftup(db dist) {return {n,d+dist*abs(n)};}
+    Point proj(Point p) {return p-n*side(p)/sq(n);}
+    Point refl(Point p) {return p-n*2*side(p)/sq(n);}
 };
 
 class Line
@@ -88,13 +70,13 @@ public:
     Line(Plane p1,Plane p2)
     {
         d=p1.n*p2.n;
-        o=(p2.n*p1.d-p1.n*p2.d)*d/abs2(d);
-    };
-    db dist2(Point p) {return abs2(d*(p-o)/abs2(d));};
-    db dist(Point p) {return sqrt(dist2(p));};
-    bool cmpproj(Point p,Point q) {return (d|p)<(d|q);};
-    Point proj(Point p) {return o+d*(d|(p-o))/abs2(d);};
-    Point refl(Point p) {return proj(p)*2-p;};
+        o=(p2.n*p1.d-p1.n*p2.d)*d/sq(d);
+    }
+    db dist2(Point p) {return sq(d*(p-o))/sq(d);}
+    db dist(Point p) {return sqrt(dist2(p));}
+    bool cmpProj(Point p,Point q) {return (d|p)<(d|q);}
+    Point proj(Point p) {return o+d*(d|(p-o))/sq(d);}
+    Point refl(Point p) {return proj(p)*2-p;}
     Point inter(Plane p) {return o-d*p.side(o)/(d|p.n);}
 };
 
@@ -105,9 +87,9 @@ db dist(Line l1,Line l2)
     return abs((l2.o-l1.o)|n)/abs(n);
 }
 
-Point closestonl1(Line l1,Line l2)
+Point closestOnL1(Line l1,Line l2) 
 {
-    Point n2=l2.d*(l1.d*l2.d);
+    Point n2 = l2.d*(l1.d*l2.d);
     return l1.o+l1.d*((l2.o-l1.o)|n2)/(l1.d|n2);
 }
 
@@ -141,7 +123,7 @@ bool is_perpendicular(Line l1,Line l2)
     return (l1.d|l2.d)==0;
 }
 
-db angle(Plane p,Line l)
+db angle(Plane p, Line l)
 {
     return PI/2-angle(p.n,l.d);
 }
@@ -173,14 +155,12 @@ class Polyhedron
 {
 public:
     vector<vector<Point> > faces;
-
     void clear(){faces.clear();}
-
     db surface_area()
     {
-        db ans=0.0;
-        for(auto f:faces) ans+=area(f);
-        return ans;
+        db S=0;
+        for(auto f:faces) S=S+area(f);
+        return S;
     }
 
     struct edge{int v;bool same;};
@@ -232,29 +212,30 @@ public:
     {
         double ans=0.0;
         for(auto f:faces) ans+=(vectorArea2(f)|f[0]);
-        return abs(ans/6.0);
+        return abs(ans)/6.0;
     }
 };
-db point_to_segment(Point &p1,Point &p2,Point &p3)
+
+T point_to_segment(Point &p1,Point &p2,Point &p3)
 {
-    db l=0.0,r=1.0,ans1,ans2;
+    T l=0.0,r=1.0,ans1,ans2;
     while(r-l>1e-14)
     {
-        db dis=(r-l)/3.0;
-        db lmid=l+dis,rmid=l+2.0*dis;
+        T dis=(r-l)/3.0;
+        T lmid=l+dis,rmid=l+2.0*dis;
         Point Q=p2+((p3-p2)*lmid),R=p2+((p3-p2)*rmid);
         ans1=p1|Q;ans2=p1|R;
         if(ans1<ans2) r=rmid; else l=lmid;
     }
     return sqrt(min(ans1,ans2));
 }
-db segment_dist(Point &p1, Point &p2, Point &p3, Point &p4)
+T segment_dist(Point &p1, Point &p2, Point &p3, Point &p4)
 {
-    db l=0.0,r=1.0,ans1,ans2;
+    T l=0.0,r=1.0,ans1,ans2;
     while(r-l>1e-14)
     {
-        db dis=(r-l)/3.0;
-        db lmid=l+dis,rmid=l+2.0*dis;
+        T dis=(r-l)/3.0;
+        T lmid=l+dis,rmid=l+2.0*dis;
         Point p=p1+((p2-p1)*lmid),q=p1+((p2-p1)*rmid);
         ans1=point_to_segment(p,p3,p4);ans2=point_to_segment(q,p3,p4);
         if(ans1<ans2) r=rmid; else l=lmid;

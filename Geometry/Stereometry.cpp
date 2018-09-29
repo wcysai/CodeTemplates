@@ -7,7 +7,7 @@
 #define S second
 using namespace std;
 typedef long double T;
-typedef double db;
+typedef long double db;
 typedef long long ll;
 typedef pair<int,int> P;
 const T PI=acos(-1.0);
@@ -26,13 +26,15 @@ public:
     T x,y,z;
     Point(){}
     Point(T tx,T ty,T tz) {x=tx,y=ty,z=tz;}
+    db dist2(Point p) {return (x-p.x)*(x-p.x)+(y-p.y)*(y-p.y)+(z-p.z)*(z-p.z);}
+    db dist(Point p) {return sqrt(dist2(p));}
     Point operator+(Point p) {return {x+p.x,y+p.y,z+p.z};}
     Point operator-(Point p) {return {x-p.x,y-p.y,z-p.z};}
     Point operator*(T d) {return {x*d,y*d,z*d};}
     Point operator/(T d) {return {x/d,y/d,z/d};}
     bool operator==(Point p) {return tie(x,y,z)==tie(p.x,p.y,p.z);}
     bool operator!=(Point p) {return !operator==(p);}
-    bool operator<(Point p) {return tie(x,y,z)<tie(p.x,p.y,p.z);}
+    const bool operator<(Point &p)const {return tie(x,y,z)<tie(p.x,p.y,p.z);}
 };
 Point zero{0,0,0};
 T operator|(Point v, Point w) {return v.x*w.x + v.y*w.y + v.z*w.z;}
@@ -42,7 +44,7 @@ Point unit(Point v) {return v/abs(v);}
 db angle(Point v, Point w) 
 {
     db cosTheta=(v|w)/abs(v)/abs(w);
-    return acos(max(-1.0,min(1.0,cosTheta)));
+    return acos(max((db)-1.0,min((db)1.0,cosTheta)));
 }
 Point operator*(Point v,Point w) {return {v.y*w.z-v.z*w.y,v.z*w.x-v.x*w.z,v.x*w.y-v.y*w.x};}
 T orient(Point p, Point q, Point r, Point s) {return (q-p)*(r-p)|(s-p);}
@@ -51,6 +53,7 @@ class Plane
 {
 public:
     Point n; T d;
+    Plane(){}
     Plane(Point n,T d) : n(n), d(d) {}
     Plane(Point n, Point p) : n(n), d(n|p) {}
     Plane(Point p, Point q, Point r) : Plane((q-p)*(r-p), p) {}
@@ -66,6 +69,7 @@ class Line
 {
 public:
     Point d,o;
+    Line(){}
     Line(Point p,Point q):d(q-p),o(p){}
     Line(Plane p1,Plane p2)
     {
@@ -154,6 +158,7 @@ db area(vector<Point> p) {return abs(vectorArea2(p))/2.0;}
 class Polyhedron
 {
 public:
+	Polyhedron(){}
     vector<vector<Point> > faces;
     void clear(){faces.clear();}
     db surface_area()

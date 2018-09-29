@@ -148,6 +148,32 @@ Point line_plane_intersection(Line &l, Plane &p)
     db vA=volume(A,p),vB=volume(B,p);
     return (A*vB+B*vA)/(vA+vB);
 }
+db point_to_segment(Point &p1,Point &p2,Point &p3)
+{
+    db l=0.0,r=1.0,ans1,ans2;
+    while(r-l>1e-14)
+    {
+        db dis=(r-l)/3.0;
+        db lmid=l+dis,rmid=l+2.0*dis;
+        Point Q=p2+lmid*(p3-p2),R=p2+rmid*(p3-p2);
+        ans1=dis2(p1,Q);ans2=dis2(p1,R);
+        if(ans1<ans2) r=rmid; else l=lmid;
+    }
+    return sqrt(min(ans1,ans2));
+}
+db segment_dist(Point &p1, Point &p2, Point &p3, Point &p4)
+{
+    db l=0.0,r=1.0,ans1,ans2;
+    while(r-l>1e-14)
+    {
+        db dis=(r-l)/3.0;
+        db lmid=l+dis,rmid=l+2.0*dis;
+        Point p=p1+lmid*(p2-p1),q=p1+rmid*(p2-p1);
+        ans1=point_to_segment(p,p3,p4);ans2=point_to_segment(q,p3,p4);
+        if(ans1<ans2) r=rmid; else l=lmid;
+    }
+    return min(ans1,ans2);
+}
 int main()
 {
     return 0;

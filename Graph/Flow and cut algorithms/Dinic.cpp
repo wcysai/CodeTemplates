@@ -10,8 +10,8 @@ int level[MAXV];
 int iter[MAXV];
 void add_edge(int from,int to,int cap)
 {
-    G[from].push_back((edge){to,cap,G[to].size()});
-    G[to].push_back((edge){from,0,G[from].size()-1});
+    G[from].push_back((edge){to,cap,(int)G[to].size()});
+    G[to].push_back((edge){from,0,(int)G[from].size()-1});
 }
 void bfs(int s)
 {
@@ -22,7 +22,7 @@ void bfs(int s)
     while(!que.empty())
     {
         int v=que.front(); que.pop();
-        for(int i=0;i<G[v].size();i++)
+        for(int i=0;i<(int)G[v].size();i++)
         {
             edge &e=G[v][i];
             if(e.cap>0&&level[e.to]<0)
@@ -37,7 +37,7 @@ void bfs(int s)
 int dfs(int v,int t,int f)
 {
     if(v==t) return f;
-    for(int &i=iter[v];i<G[v].size();i++)
+    for(int &i=iter[v];i<(int)G[v].size();i++)
     {
         edge &e=G[v][i];
         if(level[v]<level[e.to]&&e.cap>0)

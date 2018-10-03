@@ -220,7 +220,128 @@ public:
         return abs(ans)/6.0;
     }
 };
+struct fac
+{
+    int a,b,c;
+    bool ok;
+};
+struct T3dhull
+{
+    int n;
+    Point ply[MAXN];
+    int trianglecnt;
+    fac tri[MAXN];
+    int vis[MAXN][MAXN];
+    double area(Point a,Point b,Point c){return abs((b-a)*(c-a));}
+    double volume(Point a,Point b,Point c,Point d){return (b-a)*(c-a)|(d-a);}
+    double ptoplane(Point &p,fac &f)
+    {
+        Point m=ply[f.b]-ply[f.a],n=ply[f.c]-ply[f.a],t=p-ply[f.a];
+        return (m*n)|t;
+    }
+    void deal(int p,int a,int b)
+    {
+        int f=vis[a][b];
+        fac add;
+        if(tri[f].ok)
+        {
+            if((ptoplane(ply[p],tri[f]))>eps) dfs(p,f);
+            else
+            {
+                add.a=b,add.b=a,add.c=p,add.ok=1;
+                vis[p][b]=vis[a][p]=vis[b][a]=trianglecnt;
+                tri[trianglecnt++]=add;
+            }
+        }
+    }
+    void dfs(int p,int cnt)
+    {
+        tri[cnt].ok=0;
+        deal(p,tri[cnt].b,tri[cnt].a);
+        deal(p,tri[cnt].c,tri[cnt].b);
+        deal(p,tri[cnt].a,tri[cnt].c);
+    }
+    bool same(int s,int e)
+    {
+        Point a=ply[tri[s].a],b=ply[tri[s].b],c=ply[tri[s].c];
+        return fabs(volume(a,b,c,ply[tri[e].a]))<eps
+            &&fabs(volume(a,b,c,ply[tri[e].b]))<eps
+            &&fabs(volume(a,b,c,ply[tri[e].c]))<eps;
+    }
+    void construct()
+    {
+        int i,j;
+        trianglecnt=0;
+        if(n<4) return ;
+        bool tmp=true;
+        for(i=1;i<n;i++) if((abs(ply[0]-ply[i]))>eps){ swap(ply[1],ply[i]); tmp=false; break;}
+        if(tmp) return;
+        tmp=true;
+        for(i=2;i<n;i++)if((abs((ply[0]-ply[1])*(ply[1]-ply[i])))>eps){swap(ply[2],ply[i]); tmp=false; break;}
+        if(tmp) return ;
+        tmp=true;
+        for(i=3;i<n;i++) if(fabs((ply[0]-ply[1])*(ply[1]-ply[2])|(ply[0]-ply[i]))>eps){swap(ply[3],ply[i]); tmp=false; break;}
+        if(tmp) return ;
+        fac add;
+        for(i=0;i<4;i++)//构建初始四面体(4个点为ply[0],ply[1],ply[2],ply[3])
+        {
+            add.a=(i+1)%4,add.b=(i+2)%4,add.c=(i+3)%4,add.ok=1;
+            if((ptoplane(ply[i],add))>0) swap(add.b,add.c);//保证逆时针，即法向量朝外，这样新点才可看到。
+            vis[add.a][add.b]=vis[add.b][add.c]=vis[add.c][add.a]=trianglecnt;//逆向的有向边保存
+            tri[trianglecnt++]=add;
+        }
+        for(i=4;i<n;i++)//构建更新凸包
+        {
+            for(j=0;j<trianglecnt;j++)//对每个点判断是否在当前3维凸包内或外(i表示当前点,j表示当前面)
+            {
+                if(tri[j].ok&&(ptoplane(ply[i],tri[j]))>eps)//对当前凸包面进行判断，看是否点能否看到这个面
+                {
+                    dfs(i,j); break;//点能看到当前面，更新凸包的面(递归，可能不止更新一个面)。当前点更新完成后break跳出循环
+                }
+            }
+        }
+        int cnt=trianglecnt;//这些面中有一些tri[i].ok=0，它们属于开始建立但后来因为在更大凸包内故需删除的，所以下面几行代码的作用是只保存最外层的凸包
+        trianglecnt=0;
+        for(i=0;i<cnt;i++)
+        {
+            if(tri[i].ok)
+                tri[trianglecnt++]=tri[i];
+        }
+    }
+    double area()//表面积
+    {
+        double ret=0;
+        for(int i=0;i<trianglecnt;i++)
+            ret+=area(ply[tri[i].a],ply[tri[i].b],ply[tri[i].c]);
+        return ret/2;
+    }
+    double volume()//体积
+    {
+        Point p(0,0,0);
+        double ret=0;
+        for(int i=0;i<trianglecnt;i++)
+            ret+=volume(p,ply[tri[i].a],ply[tri[i].b],ply[tri[i].c]);
+        return fabs(ret/6);
+    }
+    int facetri() {return trianglecnt;}//表面三角形数
+    int facepolygon()//表面多边形数
+    {
+        int ans=0,i,j,k;
+        for(i=0;i<trianglecnt;i++)
+        {
+            for(j=0,k=1;j<i;j++)
+            {
+                if(same(i,j)) {k=0;break;}
+            }
+            ans+=k;
+        }
+        return ans;
+    }
+}hull;
 
+---------------------
+
+本文来自 tmljs1988 的CSDN 博客 ，全文地址请点击：https://blog.csdn.net/tmljs1988/article/details/7268944?utm_source=copy 
 T point_to_segment(Point &p1,Point &p2,Point &p3)
 {
     T l=0.0,r=1.0,ans1,ans2;

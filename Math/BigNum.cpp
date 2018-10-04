@@ -1,322 +1,397 @@
-#include<iostream>
-#include<string>
-#include<cstdio>
-#include<cstring>
-#include<cmath>
-#include<cstdlib>
-#include<vector>
-#include<iomanip>
-#include<algorithm>
-using namespace std;
-
-#define MAXN 9999
-#define MAXSIZE 10
-#define DLEN 4
-
-class BigNum
-{
-public:
-    int a[500];    //可以控制大数的位数
-    int len;       //大数长度
-    BigNum(){ len = 1;memset(a,0,sizeof(a)); }   //构造函数
-    BigNum(const int);       //将一个int类型的变量转化为大数
-    BigNum(const char*);     //将一个字符串类型的变量转化为大数
-    BigNum(const BigNum &);  //拷贝构造函数
-    BigNum &operator=(const BigNum &);   //重载赋值运算符，大数之间进行赋值运算
-
-    friend istream& operator>>(istream&,  BigNum&);   //重载输入运算符
-    friend ostream& operator<<(ostream&,  BigNum&);   //重载输出运算符
-
-    BigNum operator+(const BigNum &) const;   //重载加法运算符，两个大数之间的相加运算
-    BigNum operator-(const BigNum &) const;   //重载减法运算符，两个大数之间的相减运算
-    BigNum operator*(const BigNum &) const;   //重载乘法运算符，两个大数之间的相乘运算
-    BigNum operator/(const int   &) const;    //重载除法运算符，大数对一个整数进行相除运算
-
-    BigNum operator^(const int  &) const;    //大数的n次方运算
-    int    operator%(const int  &) const;    //大数对一个int类型的变量进行取模运算
-    bool   operator>(const BigNum & T)const;   //大数和另一个大数的大小比较
-    bool   operator>(const int & t)const;      //大数和一个int类型的变量的大小比较
-
-    void print();       //输出大数
+const int base = 1000000000;
+const int base_digits = 9; 
+struct bigint {
+    vector<int> a;
+    int sign;
+    /*<arpa>*/
+    int size(){
+	if(a.empty())return 0;
+	int ans=(a.size()-1)*base_digits;
+	int ca=a.back();
+	while(ca)
+	    ans++,ca/=10;
+	return ans;
+    }
+    bigint operator ^(const bigint &v){
+	bigint ans=1,a=*this,b=v;
+	while(!b.isZero()){
+	    if(b%2)
+		ans*=a;
+	    a*=a,b/=2;
+	}
+	return ans;
+    }
+    string to_string(){
+	stringstream ss;
+	ss << *this;
+	string s;
+	ss >> s;
+	return s;
+    }
+    int sumof(){
+	string s = to_string();
+	int ans = 0;
+	for(auto c : s)  ans += c - '0';
+	return ans;
+    }
+    /*</arpa>*/
+    bigint() :
+	sign(1) {
+    }
+ 
+    bigint(long long v) {
+	*this = v;
+    }
+ 
+    bigint(const string &s) {
+	read(s);
+    }
+ 
+    void operator=(const bigint &v) {
+	sign = v.sign;
+	a = v.a;
+    }
+ 
+    void operator=(long long v) {
+	sign = 1;
+	a.clear();
+	if (v < 0)
+	    sign = -1, v = -v;
+	for (; v > 0; v = v / base)
+	    a.push_back(v % base);
+    }
+ 
+    bigint operator+(const bigint &v) const {
+	if (sign == v.sign) {
+	    bigint res = v;
+ 
+	    for (int i = 0, carry = 0; i < (int) max(a.size(), v.a.size()) || carry; ++i) {
+		if (i == (int) res.a.size())
+		    res.a.push_back(0);
+		res.a[i] += carry + (i < (int) a.size() ? a[i] : 0);
+		carry = res.a[i] >= base;
+		if (carry)
+		    res.a[i] -= base;
+	    }
+	    return res;
+	}
+	return *this - (-v);
+    }
+ 
+    bigint operator-(const bigint &v) const {
+	if (sign == v.sign) {
+	    if (abs() >= v.abs()) {
+		bigint res = *this;
+		for (int i = 0, carry = 0; i < (int) v.a.size() || carry; ++i) {
+		    res.a[i] -= carry + (i < (int) v.a.size() ? v.a[i] : 0);
+		    carry = res.a[i] < 0;
+		    if (carry)
+			res.a[i] += base;
+		}
+		res.trim();
+		return res;
+	    }
+	    return -(v - *this);
+	}
+	return *this + (-v);
+    }
+ 
+    void operator*=(int v) {
+	if (v < 0)
+	    sign = -sign, v = -v;
+	for (int i = 0, carry = 0; i < (int) a.size() || carry; ++i) {
+	    if (i == (int) a.size())
+		a.push_back(0);
+	    long long cur = a[i] * (long long) v + carry;
+	    carry = (int) (cur / base);
+	    a[i] = (int) (cur % base);
+	    //asm("divl %%ecx" : "=a"(carry), "=d"(a[i]) : "A"(cur), "c"(base));
+	}
+	trim();
+    }
+ 
+    bigint operator*(int v) const {
+	bigint res = *this;
+	res *= v;
+	return res;
+    }
+ 
+    void operator*=(long long v) {
+	if (v < 0)
+	    sign = -sign, v = -v;
+	for (int i = 0, carry = 0; i < (int) a.size() || carry; ++i) {
+	    if (i == (int) a.size())
+		a.push_back(0);
+	    long long cur = a[i] * (long long) v + carry;
+	    carry = (int) (cur / base);
+	    a[i] = (int) (cur % base);
+	    //asm("divl %%ecx" : "=a"(carry), "=d"(a[i]) : "A"(cur), "c"(base));
+	}
+	trim();
+    }
+ 
+    bigint operator*(long long v) const {
+	bigint res = *this;
+	res *= v;
+	return res;
+    }
+ 
+    friend pair<bigint, bigint> divmod(const bigint &a1, const bigint &b1) {
+	int norm = base / (b1.a.back() + 1);
+	bigint a = a1.abs() * norm;
+	bigint b = b1.abs() * norm;
+	bigint q, r;
+	q.a.resize(a.a.size());
+ 
+	for (int i = a.a.size() - 1; i >= 0; i--) {
+	    r *= base;
+	    r += a.a[i];
+	    int s1 = r.a.size() <= b.a.size() ? 0 : r.a[b.a.size()];
+	    int s2 = r.a.size() <= b.a.size() - 1 ? 0 : r.a[b.a.size() - 1];
+	    int d = ((long long) base * s1 + s2) / b.a.back();
+	    r -= b * d;
+	    while (r < 0)
+		r += b, --d;
+	    q.a[i] = d;
+	}
+ 
+	q.sign = a1.sign * b1.sign;
+	r.sign = a1.sign;
+	q.trim();
+	r.trim();
+	return make_pair(q, r / norm);
+    }
+ 
+    bigint operator/(const bigint &v) const {
+	return divmod(*this, v).first;
+    }
+ 
+    bigint operator%(const bigint &v) const {
+	return divmod(*this, v).second;
+    }
+ 
+    void operator/=(int v) {
+	if (v < 0)
+	    sign = -sign, v = -v;
+	for (int i = (int) a.size() - 1, rem = 0; i >= 0; --i) {
+	    long long cur = a[i] + rem * (long long) base;
+	    a[i] = (int) (cur / v);
+	    rem = (int) (cur % v);
+	}
+	trim();
+    }
+ 
+    bigint operator/(int v) const {
+	bigint res = *this;
+	res /= v;
+	return res;
+    }
+ 
+    int operator%(int v) const {
+	if (v < 0)
+	    v = -v;
+	int m = 0;
+	for (int i = a.size() - 1; i >= 0; --i)
+	    m = (a[i] + m * (long long) base) % v;
+	return m * sign;
+    }
+ 
+    void operator+=(const bigint &v) {
+	*this = *this + v;
+    }
+    void operator-=(const bigint &v) {
+	*this = *this - v;
+    }
+    void operator*=(const bigint &v) {
+	*this = *this * v;
+    }
+    void operator/=(const bigint &v) {
+	*this = *this / v;
+    }
+ 
+    bool operator<(const bigint &v) const {
+	if (sign != v.sign)
+	    return sign < v.sign;
+	if (a.size() != v.a.size())
+	    return a.size() * sign < v.a.size() * v.sign;
+	for (int i = a.size() - 1; i >= 0; i--)
+	    if (a[i] != v.a[i])
+		return a[i] * sign < v.a[i] * sign;
+	return false;
+    }
+ 
+    bool operator>(const bigint &v) const {
+	return v < *this;
+    }
+    bool operator<=(const bigint &v) const {
+	return !(v < *this);
+    }
+    bool operator>=(const bigint &v) const {
+	return !(*this < v);
+    }
+    bool operator==(const bigint &v) const {
+	return !(*this < v) && !(v < *this);
+    }
+    bool operator!=(const bigint &v) const {
+	return *this < v || v < *this;
+    }
+ 
+    void trim() {
+	while (!a.empty() && !a.back())
+	    a.pop_back();
+	if (a.empty())
+	    sign = 1;
+    }
+ 
+    bool isZero() const {
+	return a.empty() || (a.size() == 1 && !a[0]);
+    }
+ 
+    bigint operator-() const {
+	bigint res = *this;
+	res.sign = -sign;
+	return res;
+    }
+ 
+    bigint abs() const {
+	bigint res = *this;
+	res.sign *= res.sign;
+	return res;
+    }
+ 
+    long long longValue() const {
+	long long res = 0;
+	for (int i = a.size() - 1; i >= 0; i--)
+	    res = res * base + a[i];
+	return res * sign;
+    }
+ 
+    friend bigint gcd(const bigint &a, const bigint &b) {
+	return b.isZero() ? a : gcd(b, a % b);
+    }
+    friend bigint lcm(const bigint &a, const bigint &b) {
+	return a / gcd(a, b) * b;
+    }
+ 
+    void read(const string &s) {
+	sign = 1;
+	a.clear();
+	int pos = 0;
+	while (pos < (int) s.size() && (s[pos] == '-' || s[pos] == '+')) {
+	    if (s[pos] == '-')
+		sign = -sign;
+	    ++pos;
+	}
+	for (int i = s.size() - 1; i >= pos; i -= base_digits) {
+	    int x = 0;
+	    for (int j = max(pos, i - base_digits + 1); j <= i; j++)
+		x = x * 10 + s[j] - '0';
+	    a.push_back(x);
+	}
+	trim();
+    }
+ 
+    friend istream& operator>>(istream &stream, bigint &v) {
+	string s;
+	stream >> s;
+	v.read(s);
+	return stream;
+    }
+ 
+    friend ostream& operator<<(ostream &stream, const bigint &v) {
+	if (v.sign == -1)
+	    stream << '-';
+	stream << (v.a.empty() ? 0 : v.a.back());
+	for (int i = (int) v.a.size() - 2; i >= 0; --i)
+	    stream << setw(base_digits) << setfill('0') << v.a[i];
+	return stream;
+    }
+ 
+    static vector<int> convert_base(const vector<int> &a, int old_digits, int new_digits) {
+	vector<long long> p(max(old_digits, new_digits) + 1);
+	p[0] = 1;
+	for (int i = 1; i < (int) p.size(); i++)
+	    p[i] = p[i - 1] * 10;
+	vector<int> res;
+	long long cur = 0;
+	int cur_digits = 0;
+	for (int i = 0; i < (int) a.size(); i++) {
+	    cur += a[i] * p[cur_digits];
+	    cur_digits += old_digits;
+	    while (cur_digits >= new_digits) {
+		res.push_back(int(cur % p[new_digits]));
+		cur /= p[new_digits];
+		cur_digits -= new_digits;
+	    }
+	}
+	res.push_back((int) cur);
+	while (!res.empty() && !res.back())
+	    res.pop_back();
+	return res;
+    }
+ 
+    typedef vector<long long> vll;
+ 
+    static vll karatsubaMultiply(const vll &a, const vll &b) {
+	int n = a.size();
+	vll res(n + n);
+	if (n <= 32) {
+	    for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++)
+		    res[i + j] += a[i] * b[j];
+	    return res;
+	}
+ 
+	int k = n >> 1;
+	vll a1(a.begin(), a.begin() + k);
+	vll a2(a.begin() + k, a.end());
+	vll b1(b.begin(), b.begin() + k);
+	vll b2(b.begin() + k, b.end());
+ 
+	vll a1b1 = karatsubaMultiply(a1, b1);
+	vll a2b2 = karatsubaMultiply(a2, b2);
+ 
+	for (int i = 0; i < k; i++)
+	    a2[i] += a1[i];
+	for (int i = 0; i < k; i++)
+	    b2[i] += b1[i];
+ 
+	vll r = karatsubaMultiply(a2, b2);
+	for (int i = 0; i < (int) a1b1.size(); i++)
+	    r[i] -= a1b1[i];
+	for (int i = 0; i < (int) a2b2.size(); i++)
+	    r[i] -= a2b2[i];
+ 
+	for (int i = 0; i < (int) r.size(); i++)
+	    res[i + k] += r[i];
+	for (int i = 0; i < (int) a1b1.size(); i++)
+	    res[i] += a1b1[i];
+	for (int i = 0; i < (int) a2b2.size(); i++)
+	    res[i + n] += a2b2[i];
+	return res;
+    }
+ 
+    bigint operator*(const bigint &v) const {
+	vector<int> a6 = convert_base(this->a, base_digits, 6);
+	vector<int> b6 = convert_base(v.a, base_digits, 6);
+	vll a(a6.begin(), a6.end());
+	vll b(b6.begin(), b6.end());
+	while (a.size() < b.size())
+	    a.push_back(0);
+	while (b.size() < a.size())
+	    b.push_back(0);
+	while (a.size() & (a.size() - 1))
+	    a.push_back(0), b.push_back(0);
+	vll c = karatsubaMultiply(a, b);
+	bigint res;
+	res.sign = sign * v.sign;
+	for (int i = 0, carry = 0; i < (int) c.size(); i++) {
+	    long long cur = c[i] + carry;
+	    res.a.push_back((int) (cur % 1000000));
+	    carry = (int) (cur / 1000000);
+	}
+	res.a = convert_base(res.a, 6, base_digits);
+	res.trim();
+	return res;
+    }
 };
-BigNum::BigNum(const int b)     //将一个int类型的变量转化为大数
-{
-    int c,d = b;
-    len = 0;
-    memset(a,0,sizeof(a));
-    while(d > MAXN)
-    {
-        c = d - (d / (MAXN + 1)) * (MAXN + 1);
-        d = d / (MAXN + 1);
-        a[len++] = c;
-    }
-    a[len++] = d;
-}
-BigNum::BigNum(const char*s)     //将一个字符串类型的变量转化为大数
-{
-    int t,k,index,l,i;
-    memset(a,0,sizeof(a));
-    l=strlen(s);
-    len=l/DLEN;
-    if(l%DLEN)
-        len++;
-    index=0;
-    for(i=l-1;i>=0;i-=DLEN)
-    {
-        t=0;
-        k=i-DLEN+1;
-        if(k<0)
-            k=0;
-        for(int j=k;j<=i;j++)
-            t=t*10+s[j]-'0';
-        a[index++]=t;
-    }
-}
-BigNum::BigNum(const BigNum & T) : len(T.len)  //拷贝构造函数
-{
-    int i;
-    memset(a,0,sizeof(a));
-    for(i = 0 ; i < len ; i++)
-        a[i] = T.a[i];
-}
-BigNum & BigNum::operator=(const BigNum & n)   //重载赋值运算符，大数之间进行赋值运算
-{
-    int i;
-    len = n.len;
-    memset(a,0,sizeof(a));
-    for(i = 0 ; i < len ; i++)
-        a[i] = n.a[i];
-    return *this;
-}
-istream& operator>>(istream & in,  BigNum & b)   //重载输入运算符
-{
-    char ch[MAXSIZE*4];
-    int i = -1;
-    in>>ch;
-    int l=strlen(ch);
-    int count=0,sum=0;
-    for(i=l-1;i>=0;)
-    {
-        sum = 0;
-        int t=1;
-        for(int j=0;j<4&&i>=0;j++,i--,t*=10)
-        {
-            sum+=(ch[i]-'0')*t;
-        }
-        b.a[count]=sum;
-        count++;
-    }
-    b.len =count++;
-    return in;
-
-}
-ostream& operator<<(ostream& out,  BigNum& b)   //重载输出运算符
-{
-    int i;
-    cout << b.a[b.len - 1];
-    for(i = b.len - 2 ; i >= 0 ; i--)
-    {
-        cout.width(DLEN);
-        cout.fill('0');
-        cout << b.a[i];
-    }
-    return out;
-}
-
-BigNum BigNum::operator+(const BigNum & T) const   //两个大数之间的相加运算
-{
-    BigNum t(*this);
-    int i,big;      //位数
-    big = T.len > len ? T.len : len;
-    for(i = 0 ; i < big ; i++)
-    {
-        t.a[i] +=T.a[i];
-        if(t.a[i] > MAXN)
-        {
-            t.a[i + 1]++;
-            t.a[i] -=MAXN+1;
-        }
-    }
-    if(t.a[big] != 0)
-        t.len = big + 1;
-    else
-        t.len = big;
-    return t;
-}
-BigNum BigNum::operator-(const BigNum & T) const   //两个大数之间的相减运算
-{
-    int i,j,big;
-    bool flag;
-    BigNum t1,t2;
-    if(*this>T)
-    {
-        t1=*this;
-        t2=T;
-        flag=0;
-    }
-    else
-    {
-        t1=T;
-        t2=*this;
-        flag=1;
-    }
-    big=t1.len;
-    for(i = 0 ; i < big ; i++)
-    {
-        if(t1.a[i] < t2.a[i])
-        {
-            j = i + 1;
-            while(t1.a[j] == 0)
-                j++;
-            t1.a[j--]--;
-            while(j > i)
-                t1.a[j--] += MAXN;
-            t1.a[i] += MAXN + 1 - t2.a[i];
-        }
-        else
-            t1.a[i] -= t2.a[i];
-    }
-    t1.len = big;
-    while(t1.a[t1.len - 1] == 0 && t1.len > 1)
-    {
-        t1.len--;
-        big--;
-    }
-    if(flag)
-        t1.a[big-1]=0-t1.a[big-1];
-    return t1;
-}
-
-BigNum BigNum::operator*(const BigNum & T) const   //两个大数之间的相乘运算
-{
-    BigNum ret;
-    int i,j,up;
-    int temp,temp1;
-    for(i = 0 ; i < len ; i++)
-    {
-        up = 0;
-        for(j = 0 ; j < T.len ; j++)
-        {
-            temp = a[i] * T.a[j] + ret.a[i + j] + up;
-            if(temp > MAXN)
-            {
-                temp1 = temp - temp / (MAXN + 1) * (MAXN + 1);
-                up = temp / (MAXN + 1);
-                ret.a[i + j] = temp1;
-            }
-            else
-            {
-                up = 0;
-                ret.a[i + j] = temp;
-            }
-        }
-        if(up != 0)
-            ret.a[i + j] = up;
-    }
-    ret.len = i + j;
-    while(ret.a[ret.len - 1] == 0 && ret.len > 1)
-        ret.len--;
-    return ret;
-}
-BigNum BigNum::operator/(const int & b) const   //大数对一个整数进行相除运算
-{
-    BigNum ret;
-    int i,down = 0;
-    for(i = len - 1 ; i >= 0 ; i--)
-    {
-        ret.a[i] = (a[i] + down * (MAXN + 1)) / b;
-        down = a[i] + down * (MAXN + 1) - ret.a[i] * b;
-    }
-    ret.len = len;
-    while(ret.a[ret.len - 1] == 0 && ret.len > 1)
-        ret.len--;
-    return ret;
-}
-int BigNum::operator %(const int & b) const    //大数对一个int类型的变量进行取模运算
-{
-    int i,d=0;
-    for (i = len-1; i>=0; i--)
-    {
-        d = ((d * (MAXN+1))% b + a[i])% b;
-    }
-    return d;
-}
-BigNum BigNum::operator^(const int & n) const    //大数的n次方运算
-{
-    BigNum t,ret(1);
-    int i;
-    if(n<0)
-        exit(-1);
-    if(n==0)
-        return 1;
-    if(n==1)
-        return *this;
-    int m=n;
-    while(m>1)
-    {
-        t=*this;
-        for( i=1;i<<1<=m;i<<=1)
-        {
-            t=t*t;
-        }
-        m-=i;
-        ret=ret*t;
-        if(m==1)
-            ret=ret*(*this);
-    }
-    return ret;
-}
-bool BigNum::operator>(const BigNum & T) const   //大数和另一个大数的大小比较
-{
-    int ln;
-    if(len > T.len)
-        return true;
-    else if(len == T.len)
-    {
-        ln = len - 1;
-        while(a[ln] == T.a[ln] && ln >= 0)
-            ln--;
-        if(ln >= 0 && a[ln] > T.a[ln])
-            return true;
-        else
-            return false;
-    }
-    else
-        return false;
-}
-bool BigNum::operator >(const int & t) const    //大数和一个int类型的变量的大小比较
-{
-    BigNum b(t);
-    return *this>b;
-}
-
-void BigNum::print()    //输出大数
-{
-    int i;
-    cout << a[len - 1];
-    for(i = len - 2 ; i >= 0 ; i--)
-    {
-        cout.width(DLEN);
-        cout.fill('0');
-        cout << a[i];
-    }
-    cout << endl;
-}
-int main(void)
-{
-    BigNum x=BigNum(1);
-    for(int i=2;i<=100;i++)
-        x=x*BigNum(i);
-    int sum=0;
-    x.print();
-    for(int i=0;i<500;i++)
-    {
-        while(x.a[i]>0)
-        {
-            sum+=x.a[i]%10;
-            x.a[i]/=10;
-        }
-    }
-    printf("%d\n",sum);
-    return 0;
-}

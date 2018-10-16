@@ -1,21 +1,34 @@
-#include <bits/stdc++.h>
-#define ll long long
-const int N=100050;
-ll dp[N],b[N],a[N],T[N],t,p,n,i;
-ll Get(int u, int v){ return (dp[u]-dp[v]+b[v]-b[u]-1)/(b[v]-b[u]);}
+#pragma GCC optimize(3)
+#include<bits/stdc++.h>
+#define MAXN 100005
+#define INF 1000000000
+#define MOD 1000000007
+#define F first
+#define S second
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> P;
+ll N,tot,t,now;
+ll dp[MAXN];
+P st[MAXN];
+ll get(P u,P v) {return (v.S-u.S)/(u.F-v.F);}
+void add(ll u,ll v)
+{
+    P p=P(u,v);
+    while(t-now>1&&get(st[t-1],p)<=get(st[t-1],st[t-2])) t--;
+    st[t++]=p;
+}
+ll query(ll x)
+{
+    ll l=-1,r=t-1;
+    while(r-l>1)
+    {
+        ll mid=(l+r)/2;
+        if(st[mid].F*x+st[mid].S<=st[mid+1].F*x+st[mid+1].S) l=mid; //maximize
+        else r=mid;
+    }
+    return st[r].F*x+st[r].S;
+}
 int main()
 {
-	scanf("%I64d",&n);
-	for(i=1;i<=n;i++) scanf("%I64d",&a[i]);
-	for(i=1;i<=n;i++) scanf("%I64d",&b[i]);
-	T[t++]=1;
-	for(i=2;i<=n;i++)
-	{
-		while(t-p>1 && Get(T[p],T[p+1])<=a[i]) p++;
-		dp[i]=a[i]*b[T[p]]+dp[T[p]];
-		while(t-p>1 && Get(T[t-1],i)<=Get(T[t-1],T[t-2])) t--;
-		T[t++]=i;
-	}
-	printf("%I64d\n",dp[n]);
-	return 0;
 }

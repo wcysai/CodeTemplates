@@ -63,18 +63,21 @@ int lca(int u,int v)
 int build_vtree(vector<int> &a)
 {
     sort(a.begin(),a.end(),cmp);
+    a.erase(unique(a.begin(),a.end()),a.end());
     assert(a.size()>0);
     int t=0;
     st[t++]=a[0];
+    vector<int> newly;newly.clear();
     for(int i=1;i<(int)a.size();i++)
     {
         if(t==0) {st[t++]=a[i]; continue;}
         int l=lca(a[i],st[t-1]);
         while(t>1&&dfn[st[t-2]]>=dfn[l]) add_edge(st[t-2],st[t-1]),t--;
-        if(l!=st[t-1]) add_edge(l,st[t-1]),st[t-1]=l;
+        if(l!=st[t-1]) {add_edge(l,st[t-1]),st[t-1]=l; newly.push_back(l);}
         st[t++]=a[i];
     }
-    while(t>0) add_edge(st[t-2],st[t-1]),t--;
+    while(t>1) add_edge(st[t-2],st[t-1]),t--;
+    for(auto it:newly) a.push_back(it);
     return st[0];
 }
 int main()

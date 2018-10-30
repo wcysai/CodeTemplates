@@ -1,18 +1,29 @@
 #include<bits/stdc++.h>
 #define MAXN 1000
 using namespace std;
-int p[63],a[MAXN];
+int a[MAXN];
 int n;
 int cal()
 {
-    for(int i=1;i<=n;i++)
+    int k=1;
+    for(int j=63;j>=0;j--)
     {
-        for(int j=62;j>=0;j--)
+        int t=0;
+        for(int i=k;i<=n;i--)
         {
-            if(!p[j]) {p[j]=a[i]; break;}
-            else a[i]^=p[j];
+            if((a[i]>>j)&1)
+            {
+                t=i;
+                break;
+            }
+        }
+        if(t)
+        {
+            swap(a[t],a[k]);
+            for(int i=1;i<=n;i++)
+                if(i!=k&&((a[i]>>j)&1)) a[i]^=a[k];
+            k++;
         }
     }
-    for(int j=0;j<=62;j++) if(p[j]) r++;
-    return r;
+    return k-1;
 }

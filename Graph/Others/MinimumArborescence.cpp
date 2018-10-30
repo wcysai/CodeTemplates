@@ -18,7 +18,7 @@ namespace ZL
 	int n,m,ans,pre[N],id[N],vis[N],root,In[N],h[N],len,way[M];
 	void init(int _n,int _root)
     {
-		n=_n; m=0; b[0].w=inf; root=_root;
+		n=_n; m=0; b[0].w=inf; root=_root; ans=0;
 	}
 	void add(int u,int v,int w)
     {

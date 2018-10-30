@@ -8,51 +8,80 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 int n,k,a[MAXN];
-struct edge
+namespace ZL
 {
-    int u,v,w;
-};
-int dmst(int N,vector<edge> &E,int root)
-{
-    vector<int> cost(N),back(N),label(N),bio(N);
-    int ret=0;
-    for(;;)
+	const int N=100010,M=100010,inf=1e9; 
+	struct edge
     {
-        for(int i=1;i<=N;i++) cost[i]=INF;
-        for(auto e:E)
+	    int u,v,w,use,id;
+	}b[M],a[2000100];
+	int n,m,ans,pre[N],id[N],vis[N],root,In[N],h[N],len,way[M];
+	void init(int _n,int _root)
+    {
+		n=_n; m=0; b[0].w=inf; root=_root;
+	}
+	void add(int u,int v,int w)
+    {
+		b[++m]=(edge){u,v,w,0,m};
+		a[m]=b[m];
+	}
+	int work()
+    {
+		len=m;
+	    for (;;)
         {
-            if(e.u==e.v) continue;
-            if(e.w<cost[e.v]) cost[e.v]=e.w,back[e.v]=e.u;
-        }
-        cost[root]=0;
-        for(int i=1;i<=N;i++) if(cost[i]==INF) return -1;
-        for(int i=1;i<=N;i++) ret+=cost[i];
-        int K=0;
-        for(int i=1;i<=N;i++) label[i]=1;
-        for(int i=1;i<=N;i++) bio[i]=-1;
-        for(int i=1;i<=N;i++)
-        {
-            int x=i;
-            for(;x!=root&&bio[x]==-1;x=back[x]) bio[x]=i;
-            if(x!=root&&bio[x]==i)
+	        for (int i=1;i<=n;i++){pre[i]=0; In[i]=inf; id[i]=0; vis[i]=0; h[i]=0;}
+	        for (int i=1;i<=m;i++)
+	            if (b[i].u!=b[i].v&&b[i].w<In[b[i].v])
+                {
+	                pre[b[i].v]=b[i].u; In[b[i].v]=b[i].w; h[b[i].v]=b[i].id;
+	            }
+	        for (int i=1;i<=n;i++) if (pre[i]==0&&i!=root) return 0;
+	        int cnt=0; In[root]=0;
+	        for (int i=1;i<=n;i++)
             {
-                for(;label[x]==-1;x=back[x]) label[x]=K;
-                ++K;
-            }
-        }
-        if(K==0) break;
-        for(int i=1;i<=N;i++) if(label[i]==-1) label[i]=K++;
-        for(auto &e:E)
+	            if (i!=root) a[h[i]].use++; 
+	            int now=i; ans+=In[i];
+	            while (vis[now]==0&&now!=root)
+                {
+	                vis[now]=i; now=pre[now];
+	            }
+	            if (now!=root&&vis[now]==i)
+                {
+	                cnt++; int kk=now;
+	                while (1)
+                    {
+	                    id[now]=cnt; now=pre[now];
+	                    if (now==kk) break;
+	                }
+	            }
+	        }
+	        if (cnt==0) return 1;
+	        for (int i=1;i<=n;i++) if (id[i]==0) id[i]=++cnt;
+	        for (int i=1;i<=m;i++)
+            {
+	            int k1=In[b[i].v]; int k2=b[i].v;
+	            b[i].u=id[b[i].u]; b[i].v=id[b[i].v];       
+	            if (b[i].u!=b[i].v)
+                {
+	                b[i].w-=k1; a[++len].u=b[i].id; a[len].v=h[k2];
+	                b[i].id=len;
+	            }
+	        }
+	        n=cnt;
+	        root=id[root];
+	    }
+	    return 1;
+	}
+	void getway()
+    {
+		for (int i=1;i<=m;i++) way[i]=0;
+		for (int i=len;i>m;i--)
         {
-            int uu=label[e.u];
-            int vv=label[e.v];
-            if(uu!=vv) e.w-=cost[e.v];
-            e.u=uu;e.v=vv;
-        }
-        root=label[root];
-        N=K;
-    }
-    return ret;
+			a[a[i].u].use+=a[i].use; a[a[i].v].use-=a[i].use;
+		}
+		for (int i=1;i<=m;i++) way[i]=a[i].use;
+	}
 }
 int main()
 {

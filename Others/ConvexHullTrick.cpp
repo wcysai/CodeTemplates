@@ -9,7 +9,6 @@ using namespace std;
 typedef long long ll;
 typedef pair<ll,ll> P;
 ll N,tot,t,now;
-ll dp[MAXN];
 P st[MAXN];
 ll get(P u,P v) {return (v.S-u.S)/(u.F-v.F);}
 void add(ll u,ll v)
@@ -18,13 +17,18 @@ void add(ll u,ll v)
     while(t-now>1&&get(st[t-1],p)<=get(st[t-1],st[t-2])) t--;
     st[t++]=p;
 }
+bool cmp(P x,P y)
+{
+    if(x.S!=y.S) return x.S<y.S;
+    return x.F<y.F;
+}
 ll query(ll x)
 {
     ll l=-1,r=t-1;
     while(r-l>1)
     {
         ll mid=(l+r)/2;
-        if(st[mid].F*x+st[mid].S<=st[mid+1].F*x+st[mid+1].S) l=mid; //maximize
+        if(st[mid].F*x+st[mid].S<=st[mid+1].F*x+st[mid+1].S) l=mid;
         else r=mid;
     }
     return st[r].F*x+st[r].S;

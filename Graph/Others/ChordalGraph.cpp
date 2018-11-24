@@ -17,26 +17,28 @@ typedef long long ll;
 typedef pair<int,int> P;
 int n,m;
 vector<int> G[MAXN];
-int h[MAXN];
+int h[MAXN],label[MAXN];
+vector<int> st[MAXN];
 bool vis[MAXN];
 vector<int> peo;
-priority_queue<P> pque;
 void MCS()
 {
     memset(vis,0,sizeof(vis));
     memset(h,0,sizeof(h));
-    for(int i=1;i<=n;i++) pque.push(P(0,i));
+    int cur=0;
+    for(int i=1;i<=n;i++) st[0].push_back(i);
     for(int i=n;i>=1;i--)
     {
         while(1)
         {
-            P p=pque.top();pque.pop();
-            if(vis[p.S]) continue;
-            peo.push_back(p.S);vis[p.S]=true;
-            for(auto to:G[p.S]) 
+            while(st[cur].size()==0) cur--;
+            int now=st[cur].back();
+            st[cur].pop_back();if(vis[now]) continue;
+            vis[now]=true;label[now]=i;
+            for(auto to:G[now])
             {
                 if(vis[to]) continue;
-                h[to]++;pque.push(P(h[to],to));
+                h[to]++; st[h[to]].push_back(to); cur=max(cur,h[to]);
             }
             break;
         }

@@ -29,9 +29,12 @@ int main()
         for(auto to:G[i]) if(r[to]>r[i]) gr[i].push_back(to); 
     int ans=0;
     for(int i=1;i<=n;i++)
+    {
+        for(auto u:gr[i]) cnt[u]++;
         for(auto u:gr[i])
-            for(auto to:gr[u])
-                if(r[to]>r[i]) ans++;
+            for(auto to:gr[u]) ans+=cnt[to];
+        for(auto u:gr[i]) cnt[u]--;
+    }
     printf("%d\n",ans);
     return 0;
 }

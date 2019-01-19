@@ -9,7 +9,7 @@ int cal()
     for(int j=63;j>=0;j--)
     {
         int t=0;
-        for(int i=k;i<=n;i--)
+        for(int i=k;i<=n;i++)
         {
             if((a[i]>>j)&1)
             {

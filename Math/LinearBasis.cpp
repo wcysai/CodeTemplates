@@ -14,7 +14,7 @@ int main()
             {
                 if(!bas[j])
                 {
-                    bas[j]=x;;
+                    bas[j]=x;
                     break;
                 }
                 x^=bas[j];

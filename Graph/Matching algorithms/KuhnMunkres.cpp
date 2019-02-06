@@ -9,7 +9,6 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 int n;
-int A[MAXN],B[MAXN],K[MAXN];
 int w[MAXN][MAXN];
 //minimum weight bipartite matching
 ll km(int n,int m)

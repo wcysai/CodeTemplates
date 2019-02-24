@@ -41,7 +41,6 @@ int tarjan()
     memset(dfn,0,sizeof(dfn));
     memset(art,false,sizeof(art));
     for(int i=1;i<=n;i++) if(!dfn[i]) dfs(i,-1,t=0);
-    return bcc_cnt;
 }
 int main()
 {

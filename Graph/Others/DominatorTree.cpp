@@ -28,29 +28,22 @@ void dfs(int v)
 {
 	t++;arr[v]=t;rev[t]=v;
 	label[t]=t;sdom[t]=t;dsu[t]=t;
-	for(int i=0;i<G[v].size();i++)
+	for(int i=0;i<(int)G[v].size();i++)
 	{
 		int to=G[v][i];
 		if(!arr[to]) dfs(to),par[arr[to]]=arr[v];
 		rG[arr[to]].push_back(arr[v]);
 	}
 }
-int main()
+void build_dominator_tree(int r)
 {
-	scanf("%d%d",&n,&m);
-	for(int i=1;i<=m;i++)
-	{
-		int u,v;
-		scanf("%d%d",&u,&v);
-		G[u].push_back(v);
-	}
-	dfs(1);n=t;
+    dfs(r);n=t;
 	for(int i=n;i>=1;i--)
 	{
-		for(int j=0;j<rG[i].size();j++)
+		for(int j=0;j<(int)rG[i].size();j++)
 			sdom[i]=min(sdom[i],sdom[find(rG[i][j])]);
 		if(i>1) bucket[sdom[i]].push_back(i);
-		for(int j=0;j<bucket[i].size();j++)
+		for(int j=0;j<(int)bucket[i].size();j++)
 		{
 			int w=bucket[i][j],v=find(w);
 			if(sdom[v]==sdom[w]) idom[w]=sdom[w];
@@ -62,7 +55,6 @@ int main()
 	{
 		if(idom[i]!=sdom[i]) idom[i]=idom[idom[i]];
 		dt[rev[idom[i]]].push_back(rev[i]);
-		printf("%d %d\n",rev[i],rev[idom[i]]);
 	}
-	return 0;
 }
+	

@@ -30,7 +30,7 @@ void dfs(int v,int p,int &tot)
             low[v]=min(low[v],low[to]);
             if(low[to]>=dfn[v])
             {
-                art[to]=(dfn[v]>1||dfn[to]>2);
+                art[v]=(dfn[v]>1||dfn[to]>2);
                 bcc_cnt++;
                 bcc[bcc_cnt].push_back(v); bccno[v]=bcc_cnt;
                 while(bcc[bcc_cnt].back()!=v)
@@ -45,10 +45,10 @@ void dfs(int v,int p,int &tot)
 }
 int tarjan()
 {
-    bcc_cnt=tot=0;
+    bcc_cnt=t=0;
     memset(dfn,0,sizeof(dfn));
     memset(art,false,sizeof(art));
-    for(int i=1;i<=n;i++) if(!dfn[i]) dfs(i,-1,t=0);
+    for(int i=1;i<=n;i++) if(!dfn[i]) dfs(i,-1,tot=0);
     return bcc_cnt;
 }
 void build_block_cut_tree()

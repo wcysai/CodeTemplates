@@ -37,8 +37,8 @@ void dfs(int v)
 }
 void build_dominator_tree(int r)
 {
-    dfs(r);n=t;
-	for(int i=n;i>=1;i--)
+    dfs(r);int N=t;
+	for(int i=N;i>=1;i--)
 	{
 		for(int j=0;j<(int)rG[i].size();j++)
 			sdom[i]=min(sdom[i],sdom[find(rG[i][j])]);
@@ -51,10 +51,11 @@ void build_dominator_tree(int r)
 		}
 		if(i>1) unite(par[i],i);
 	}
-	for(int i=2;i<=n;i++)
+	for(int i=2;i<=N;i++)
 	{
 		if(idom[i]!=sdom[i]) idom[i]=idom[idom[i]];
 		dt[rev[idom[i]]].push_back(rev[i]);
 	}
+    for(int i=1;i<=N;i++) bucket[i].clear(),rG[i].clear();
 }
 	

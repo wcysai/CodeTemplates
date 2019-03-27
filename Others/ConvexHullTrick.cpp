@@ -14,7 +14,7 @@ ll get(P u,P v) {return (v.S-u.S)/(u.F-v.F);}
 void add(ll u,ll v)
 {
     P p=P(u,v);
-    while(t-now>1&&get(st[t-1],p)<=get(st[t-1],st[t-2])) t--;
+    while(t-now>1&&(st[t-1].F-st[t-2].F)*(p.S-st[t-1].S)<=(st[t-1].F-p.F)*(st[t-2].S-st[t-1].S)) t--;
     st[t++]=p;
 }
 bool cmp(P x,P y)

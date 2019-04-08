@@ -9,73 +9,65 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 typedef double db;
+typedef vector<db> vec;
+typedef vector<vec> mat;
 const db eps=1e-8;
-//n variables,m constraints
-//ith constriant like: \sum_{j=1}^{n} a[i][j] \cdot x[j]\leq a[i][0]
-//minimize object function, constraints are \geq
-//object function: \sum_{i=1}^{n} a[0][i]\cdot x_{i}
-//original: minimize CX constraint AX\geq B
-//dual: maximize B^{T}Y constraint A^{T}\leq C^{T}
-int n,m,id[MAXN],tp[MAXN];
-db a[MAXM][MAXN];
-void pivot(int r,int c)
+bool eq(db a,db b)
 {
-    swap(id[r+n],id[c]);
-    db t=-a[r][c];
-    a[r][c]=-1;
-    for(int i=0;i<=n;i++) a[r][i]/=t;
-    for(int i=0;i<=m;i++)
+    return fabs(a-b)<eps;
+}
+bool ls(db a,db b)
+{
+    return a<b&&!eq(a,b);
+}
+vec simplex(mat a)
+{
+    int n=(int)a.size()-1;
+    int m=(int)a[0].size()-1;
+    vec left(n+1),up(m+1);
+    iota(up.begin(),up.end(),0);
+    iota(left.begin(),left.end(),m);
+    auto pivot=[&](int x,int y)
     {
-        if(a[i][c]&&r!=i)
+        swap(left[x],up[y]);
+        db k=a[x][y];
+        a[x][y]=1;
+        vector<int> vct;
+        for(int j=0;j<=m;j++)
         {
-            t=a[i][c];
-            a[i][c]=0;
-            for(int j=0;j<=n;j++) a[i][j]+=t*a[r][j];
+            a[x][j]/=k;
+            if(!eq(a[x][j],0)) vct.push_back(j);
         }
-    }
-}
-void solve()
-{
-    db t;
-    for(int i=1;i<=n;i++) id[i]=i;
-    while(true)
-    {
-        int i=0,j=0; db w=-eps;
-        for(int k=1;k<=m;k++) if(a[k][0]<w) w=a[i=k][0];
-        if(!i) break;
-        for(int k=1;k<=n;k++) if(a[i][k]>eps) {j=k; break;}
-        if(!j) {puts("Infeasible"); return;}
-        pivot(i,j);
-    }
-    while(true)
-    {
-        int i=0,j=0; db w=eps;
-        for(int k=1;k<=n;k++) if(a[0][k]>w) w=a[0][j=k];
-        if(!j) break;
-        w=INF;
-        for(int k=1;k<=m;k++) if(a[k][j]<-eps&&(t=-a[k][0]/a[k][j])<w)
+        for(int i=0;i<=n;i++) 
         {
-            w=t;
-            i=k;
+            if(eq(a[i][y],0)||i==x) continue;
+            k=a[i][y];
+            a[i][y]=0;
+            for(int j:vct) a[i][j]-=k*a[x][j];
         }
-        if(!i) {puts("Unbounded"); return;}
-        pivot(i,j);
-    }
-    printf("%.10f\n",a[0][0]);
-    for(int i=n+1;i<=n+m;i++) tp[id[i]]=i-n;
-    for(int i=1;i<=n;i++) printf("%.10f",tp[i]?a[tp[i]][0]:0);
-}
-int main()
-{
-    scanf("%d%d",&n,&m);
-    for(int i=1;i<=n;i++) scanf("%lf",&a[0][i]);
-    for(int i=1;i<=m;i++)
+    };
+    while(1)
     {
-        for(int j=1;j<=n;j++)
-            scanf("%lf",&a[i][j]),a[i][j]*=-1;
-        scanf("%lf",&a[i][0]);
+        int x=-1;
+        for(int i=1;i<=n;i++) if(ls(a[i][0],0)&&(x==-1||a[i][0]<a[x][0])) x=i;
+        if(x==-1) break;
+        int y=-1;
+        for(int j=1;j<=m;j++) if(ls(a[x][j],0)&&(y==-1||a[x][j]<a[x][y])) y=j;
+        assert(y!=-1);
+        pivot(x,y);
     }
-    solve();
-    return 0;
+    while(1)
+    {
+        int y=-1;
+        for(int j=1;j<m;j++) if(ls(0,a[0][j])&&(y==-1||a[0][j]>a[0][y])) y=j;
+        if(y==-1) break;
+        int x=-1;
+        for(int i=1;i<=n;i++) if(ls(0,a[i][y])&&(x==-1||a[i][0]/a[i][y]<a[x][0]/a[x][y])) x=i;
+        assert(x!=-1);
+        pivot(x,y);
+    }
+    vector<double> ans(m+1);
+    for(int i=1;i<=n;i++) if(left[i]<=m) ans[left[i]]=a[i][0];
+    ans[0]=-a[0][0];
+    return ans;
 }
-

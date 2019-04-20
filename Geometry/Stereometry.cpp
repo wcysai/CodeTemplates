@@ -281,9 +281,9 @@ struct T3dhull
         if(tmp) return ;
         tmp=true;
         for(i=3;i<n;i++) if(fabs((ply[0]-ply[1])*(ply[1]-ply[2])|(ply[0]-ply[i]))>eps){swap(ply[3],ply[i]); tmp=false; break;}
-        if(tmp) return ;
+        if(tmp) return;
         fac add;
-        for(i=0;i<4;i++)//构建初始四面体(4个点为ply[0],ply[1],ply[2],ply[3])
+        for(i=0;i<4;i++)
         {
             add.a=(i+1)%4,add.b=(i+2)%4,add.c=(i+3)%4,add.ok=1;
             if((ptoplane(ply[i],add))>0) swap(add.b,add.c);//保证逆时针，即法向量朝外，这样新点才可看到。
@@ -339,9 +339,7 @@ struct T3dhull
     }
 }hull;
 
----------------------
 
-本文来自 tmljs1988 的CSDN 博客 ，全文地址请点击：https://blog.csdn.net/tmljs1988/article/details/7268944?utm_source=copy 
 T point_to_segment(Point &p1,Point &p2,Point &p3)
 {
     T l=0.0,r=1.0,ans1,ans2;
@@ -350,7 +348,7 @@ T point_to_segment(Point &p1,Point &p2,Point &p3)
         T dis=(r-l)/3.0;
         T lmid=l+dis,rmid=l+2.0*dis;
         Point Q=p2+((p3-p2)*lmid),R=p2+((p3-p2)*rmid);
-        ans1=p1|Q;ans2=p1|R;
+        ans1=p1.dis2(Q);ans2=p1.dis2(R);
         if(ans1<ans2) r=rmid; else l=lmid;
     }
     return sqrt(min(ans1,ans2));

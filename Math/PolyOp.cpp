@@ -238,6 +238,19 @@ namespace poly
         fd=fft::multiply_mod(fd,fc,MOD);
         fd.resize(n);return fd;
     }
+    void division(vector<int> &a,vector<int> &b,vector<int> &q,vector<int> &r)
+    {
+        int n=(int)a.size(),m=(int)b.size();
+        if(n<m) {q.resize(1); q[0]=0; r=a; return;}
+        vector<int> tmp=b; reverse(tmp.begin(),tmp.end());
+        tmp=get_inv(tmp,n-m+1);
+        vector<int> rev=a; reverse(rev.begin(),rev.end());
+        q=fft::multiply_mod(tmp,rev,MOD); q.resize(n-m+1);
+        reverse(q.begin(),q.end());
+        vector<int> t=fft::multiply_mod(b,q,MOD);
+        r.resize(m-1);
+        for(int i=0;i<m-1;i++) r[i]=dec(a[i],t[i]); 
+    }
     vector<int> diff(vector<int> &a)
     {
         for(int i=1;i<(int)a.size();i++) a[i-1]=1LL*a[i]*i%MOD;

@@ -230,9 +230,10 @@ namespace poly
             fc[0]=x;return fc;
         }
         fd=get_sqrt(a,(n+1)>>1);
-        fc=get_inv(fd,(n+1)>>1);
+        fc=get_inv(fd,n);
         fd=fft::multiply_mod(fd,fd,MOD,1);
-        for(int i=0;i<(n+1)/2;i++) fc[i]=1LL*fc[i]*((MOD+1)/2)%MOD;
+        fd.resize(n);
+        for(int i=0;i<n;i++) fc[i]=1LL*fc[i]*((MOD+1)/2)%MOD;
         for(int i=0;i<n;i++) fd[i]=inc(fd[i],a[i]);
         fd=fft::multiply_mod(fd,fc,MOD);
         fd.resize(n);return fd;

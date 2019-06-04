@@ -9,7 +9,7 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 int n,q;
-int st[MAXLOGN][2*MAXN];
+int st[MAXLOGN+1][4*MAXN];
 vector<int> G[MAXN];
 int vs[MAXN*2-1];
 int depth[MAXN*2-1];

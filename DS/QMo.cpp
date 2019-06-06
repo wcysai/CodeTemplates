@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
-#define MAXN 10005
+#define MAXN 50005
+#define MAXM 1000005
 #define INF 1000000000
 #define MOD 1000000007
 #define F first
@@ -7,97 +8,66 @@
 using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
-struct query{int l,r,t,id;};
-int n,m,c[MAXN],cnt[100*MAXN],res,cur,ans[MAXN];
-query q[MAXN];
-int tim[MAXN],pos[MAXN],pre[MAXN],val[MAXN];
-int totq,totc,nowl,nowr;
-const int blocks=462;
+const int blocks=1200;
+int tot,tcnt,qid;
+struct query
+{
+    int l,r,ti,id;
+}Q[MAXN];
+int n,q,cnt[MAXM],ans,a[MAXN];
+P change[MAXN];
+int res[MAXN];
 bool cmp(query x,query y)
 {
-    if(x.l/blocks!=y.l/blocks) return x.l<y.l;
-    if(x.r/blocks!=y.r/blocks) return x.r<y.r;
-    return x.t<y.t;
+    if(x.l/blocks!=y.l/blocks) return x.l/blocks<y.l/blocks;
+    if(x.r/blocks!=y.r/blocks) return x.r/blocks<y.r/blocks;
+    if(x.r/blocks&1) return x.ti>y.ti; else return x.ti<y.ti;
 }
-char ch[5];
-void add(int p)
+void add(int pos)
 {
-    if(!cnt[c[p]]) res++;
-    cnt[c[p]]++;
+    if(!cnt[a[pos]]) ans++;
+    cnt[a[pos]]++;
 }
-void del(int p)
+void del(int pos)
 {
-    cnt[c[p]]--;
-    if(!cnt[c[p]]) res--;
+    cnt[a[pos]]--;
+    if(!cnt[a[pos]]) ans--;
 }
-void tadd(int cur)
+void modify(int ti,int num)
 {
-    if(pos[cur]>=nowl&&pos[cur]<=nowr)
+    if(change[ti].F>=Q[num].l&&change[ti].F<=Q[num].r)
     {
-        cnt[c[pos[cur]]]--;
-        if(!cnt[c[pos[cur]]]) res--;
+        cnt[a[change[ti].F]]--;
+        if(!cnt[a[change[ti].F]]) ans--;
+        if(!cnt[change[ti].S]) ans++;
+        cnt[change[ti].S]++;
     }
-    pre[cur]=c[pos[cur]];
-    c[pos[cur]]=val[cur];
-    if(pos[cur]>=nowl&&pos[cur]<=nowr)
-    {
-        if(!cnt[c[pos[cur]]]) res++;
-        cnt[c[pos[cur]]]++;
-    }
+    swap(a[change[ti].F],change[ti].S);
 }
-void tdel(int cur)
-{
-    if(pos[cur]>=nowl&&pos[cur]<=nowr)
-    {
-        cnt[c[pos[cur]]]--;
-        if(!cnt[c[pos[cur]]]) res--;
-    }
-    c[pos[cur]]=pre[cur];
-    if(pos[cur]>=nowl&&pos[cur]<=nowr)
-    {
-        if(!cnt[c[pos[cur]]]) res++;
-        cnt[c[pos[cur]]]++;
-    }
-}
-void tupd(int now)
-{
-    while(cur<totc&&tim[cur+1]<=now) tadd(++cur);
-    while(cur>0&&tim[cur]>now) tdel(cur--);
-}
-void upd(int now,int l,int r)
-{
-    tupd(now);
-    while(nowl>l) add(--nowl);
-    while(nowr<r) add(++nowr);
-    while(nowl<l) del(nowl++);
-    while(nowr>r) del(nowr--);
-}
+char ch[2];
 int main()
 {
-    scanf("%d%d",&n,&m);
-    for(int i=1;i<=n;i++) scanf("%d",&c[i]);
-    for(int i=1;i<=m;i++)
+    scanf("%d%d",&n,&q);
+    for(int i=1;i<=n;i++) scanf("%d",&a[i]);
+    for(int i=1;i<=q;i++)
     {
-        scanf("%s",ch);
-        if(ch[0]=='Q')
-        {
-            totq++;q[totq].id=totq;q[totq].t=i;
-            scanf("%d%d",&q[totq].l,&q[totq].r);
-        }
-        else
-        {
-            totc++;tim[totc]=i;
-            scanf("%d%d",&pos[totc],&val[totc]);
-        }
+        int l,r;
+        scanf("%s%d%d",ch,&l,&r);
+        if(ch[0]=='Q') Q[++tot]=(query){l,r,tcnt,++qid};
+        else change[++tcnt]=P(l,r);
     }
-    sort(q+1,q+totq+1,cmp);
-    nowl=1;nowr=0;cur=0;
-    for(int i=1;i<=totq;i++)
+    sort(Q+1,Q+tot+1,cmp);
+    int l=1,r=0,ti=0;
+    for(int i=1;i<=tot;i++)
     {
-        upd(q[i].t,q[i].l,q[i].r);
-        ans[q[i].id]=res;
+        while(l>Q[i].l) add(--l);
+        while(l<Q[i].l) del(l++);
+        while(r<Q[i].r) add(++r);
+        while(r>Q[i].r) del(r--);
+        while(ti<Q[i].ti) modify(++ti,i);
+        while(ti>Q[i].ti) modify(ti--,i);
+        res[Q[i].id]=ans;
     }
-    for(int i=1;i<=totq;i++) printf("%d\n",ans[i]);
+    for(int i=1;i<=qid;i++) printf("%d\n",res[i]);
     return 0;
 }
-

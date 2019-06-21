@@ -1,4 +1,3 @@
-#pragma GCC optimize(3)
 #include<bits/stdc++.h>
 #define MAXN 100005
 #define INF 1000000000
@@ -8,30 +7,29 @@
 using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
-int n,k,a[MAXN];
+inline int inc(int a,int b) {a+=b; return a>=MOD?a-MOD:a;}
+inline int dec(int a,int b) {a-=b; return a<0?a+MOD:a;}
 int pow_mod(int a,int i,int m)
 {
     int s=1;
     while(i)
     {
-        if(i&1)  s=1LL*s*a%m;
+        if(i&1) s=1LL*s*a%m;
         a=1LL*a*a%m;
         i>>=1;
     }
     return s;
 }
-inline int inc(int a,int b) {a+=b; return a>=MOD?a-MOD:a;}
-inline int dec(int a,int b) {a-=b; return a<0?a+MOD:a;}
-int Tonelli_Shanks(int n,ll p)
+ll Tonelli_Shanks(int n,ll p)
 {
     if(p==2) return (n&1)?1:-1;
     if(pow_mod(n,p>>1,p)!=1) return -1;
     if(p&2) return pow_mod(n,(p+1)>>2,p);
-    int s=__builtin_ctzll(p^1);
-    int q=p>>s,z=2;
+    ll s=__builtin_ctzll(p^1);
+    ll q=p>>s,z=2;
     for(;pow_mod(z,p>>1,p)==1;++z);
-    int c=pow_mod(z,q,p),r=pow_mod(n,(q+1)>>1,p),t=pow_mod(n,q,p),tmp;
-    for(int m=s,i;t!=1;)
+    ll c=pow_mod(z,q,p),r=pow_mod(n,(q+1)>>1,p),t=pow_mod(n,q,p),tmp;
+    for(ll m=s,i;t!=1;)
     {
         for(i=0,tmp=t;tmp!=1;++i) tmp=tmp*tmp%p;
         for(;i<--m;) c=c*c%p;
@@ -199,51 +197,92 @@ namespace fft
 namespace poly
 {
     int inv(int x) {return pow_mod(x,MOD-2,MOD);}
-    vector<int> fa,fb,fc,fd;
-    vector<int> get_inv(vector<int> &a,int n)
+    vector<int> fa,fb,fc,fd,fe,ff,fg,Inv;
+    void get_inv(vector<int> &a,int n,vector<int> &ret)
     {
         assert(a[0]!=0);
         if(n==1)
         {
-            fa.resize(1);
-            fa[0]=inv(a[0]);
-            return fa;
+            ret.resize(1);
+            ret[0]=inv(a[0]);
+            return;
         }
-        fa=get_inv(a,(n+1)>>1);
-        fb=fft::multiply_mod(fa,fa,MOD,1);
-        fb=fft::multiply_mod(fb,a,MOD);
-        fa.resize(n);
+        get_inv(a,(n+1)>>1,ret);
+        fa=a; fb=ret;
+        fa=fft::multiply_mod(fb,fb,MOD,1);
+        fa=fft::multiply_mod(fa,a,MOD);
+        fa.resize(n); fb.resize(n); ret.resize(n);
         for(int i=0;i<n;i++)
         {
-            fa[i]=inc(fa[i],fa[i]);
-            fa[i]=dec(fa[i],fb[i]);
+            ret[i]=inc(fb[i],fb[i]);
+            ret[i]=dec(ret[i],fa[i]);
         }
-        return fa;
+        fa.clear(); fb.clear();
     }
-    vector<int> get_sqrt(vector<int> &a,int n)
+    void get_sqrt(vector<int> &a,int n,vector<int> &ret)
     {
         if(n==1) 
         {
-            fc.resize(1);
+            ret.resize(1);
             int x=Tonelli_Shanks(a[0],MOD);
             assert(x!=-1);
-            fc[0]=x;return fc;
+            ret[0]=x;
+            return;
         }
-        fd=get_sqrt(a,(n+1)>>1);
-        fc=get_inv(fd,n);
-        fd=fft::multiply_mod(fd,fd,MOD,1);
-        fd.resize(n);
+        get_sqrt(a,(n+1)>>1,ret);
+        get_inv(ret,n,fc);
+        ret=fft::multiply_mod(ret,ret,MOD,1);
+        ret.resize(n);
         for(int i=0;i<n;i++) fc[i]=1LL*fc[i]*((MOD+1)/2)%MOD;
-        for(int i=0;i<n;i++) fd[i]=inc(fd[i],a[i]);
-        fd=fft::multiply_mod(fd,fc,MOD);
-        fd.resize(n);return fd;
+        for(int i=0;i<n;i++) ret[i]=inc(ret[i],a[i]);
+        ret=fft::multiply_mod(ret,fc,MOD);
+        ret.resize(n);
+    }
+    void diff(vector<int> &a,int n,vector<int> &ret)
+    {
+        ret.resize(n);
+        for(int i=1;i<n;i++) ret[i-1]=1LL*a[i]*i%MOD;
+        ret[n-1]=0;
+    }
+    void intg(vector<int> &a,int n,vector<int> &ret)
+    {
+        ret.resize(n); Inv.resize(n);
+        if(n>1) Inv[1]=1;
+        for(int i=2;i<=n-1;i++) Inv[i]=dec(MOD,1LL*Inv[MOD%i]*(MOD/i)%MOD);
+        for(int i=n-1;i>=1;i--) ret[i]=1LL*a[i-1]*Inv[i]%MOD;
+        ret[0]=0;
+    } 
+    void get_ln(vector<int> &a,int n,vector<int> &ret)
+    {
+        assert(a[0]==1);
+        diff(a,n,fc);
+        get_inv(a,n,fd);
+        fc=fft::multiply_mod(fc,fd,MOD);
+        intg(fc,n,ret); 
+        ret.resize(n);
+        fc.clear(); fd.clear();
+    }
+    void get_exp(vector<int> &a,int n,vector<int> &ret)
+    {
+        if(n==1)
+        {
+            ret.resize(1); ret[0]=1;
+            return;
+        }
+        get_exp(a,(n+1)>>1,ret); ret.resize(n);
+        get_ln(ret,n,ff);
+        for(int i=0;i<n;i++) ff[i]=dec(MOD,ff[i]);
+        ff[0]+=1; if(ff[0]>=MOD) ff[0]-=MOD;
+        for(int i=0;i<n;i++) ff[i]=inc(ff[i],a[i]);
+        ret=fft::multiply_mod(ret,ff,MOD); ret.resize(n);
+        ff.clear();
     }
     void division(vector<int> &a,vector<int> &b,vector<int> &q,vector<int> &r)
     {
         int n=(int)a.size(),m=(int)b.size();
         if(n<m) {q.resize(1); q[0]=0; r=a; return;}
         vector<int> tmp=b; reverse(tmp.begin(),tmp.end());
-        tmp=get_inv(tmp,n-m+1);
+        get_inv(tmp,n-m+1,tmp);
         vector<int> rev=a; reverse(rev.begin(),rev.end());
         q=fft::multiply_mod(tmp,rev,MOD); q.resize(n-m+1);
         reverse(q.begin(),q.end());
@@ -251,30 +290,18 @@ namespace poly
         r.resize(m-1);
         for(int i=0;i<m-1;i++) r[i]=dec(a[i],t[i]); 
     }
-    vector<int> diff(vector<int> &a)
-    {
-        for(int i=1;i<(int)a.size();i++) a[i-1]=1LL*a[i]*i%MOD;
-        if(a.size()>=1) a.resize((int)a.size()-1);
-        return a;
-    }
-    vector<int> intg(vector<int> &a)
-    {
-        int sz=(int)a.size();
-        a.resize(sz+1);
-        static vector<int> Inv(sz+1);
-        Inv[1]=1;
-        for(int i=2;i<=sz;i++) Inv[i]=dec(MOD,1LL*Inv[MOD%i]*(MOD/i)%MOD);
-        for(int i=sz;i>=1;i--) a[i]=1LL*a[i-1]*Inv[i]%MOD;
-        a[0]=0;
-        return a;
-    }
-};
+}
+int n,m,k;
+vector<int> f,g,a,b;
 int main()
 {
-    vector<int> res(20);
-    res[0]=1;res[1]=2;res[2]=1;
-    res=poly::get_sqrt(res,6);
-    for(int i=0;i<(int)res.size();i++) printf("%d ",res[i]);
+    scanf("%d",&n);
+    f.resize(n);
+    for(int i=0;i<n;i++) scanf("%d",&f[i]);
+    vector<int> expf;
+    poly::get_exp(f,n,expf);
+    for(int i=0;i<n;i++) printf("%d ",expf[i]);
     return 0;
 }
+
 

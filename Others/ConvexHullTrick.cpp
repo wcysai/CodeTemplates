@@ -10,7 +10,6 @@ typedef long long ll;
 typedef pair<ll,ll> P;
 ll N,tot,t,now;
 P st[MAXN];
-ll get(P u,P v) {return (v.S-u.S)/(u.F-v.F);}
 void add(ll u,ll v)
 {
     P p=P(u,v);

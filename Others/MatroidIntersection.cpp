@@ -8,47 +8,53 @@
 using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
-int color[MAXN];
+int color[MAXM];
 ll val[MAXM];
 int n,m,tot,tot2;
 struct LinearMatroid
 {
     ll basis[62];
-    bool test(vector<int> &v)
+    void clear()
     {
         memset(basis,0,sizeof(basis));
-        for(auto i:v)
+    }
+    void add(ll x)
+    {
+        for(int j=60;j>=0;j--)
         {
-            ll x=val[i];
-            bool f=false;
-            for(int j=60;j>=0;j--)
+            if(!(x&(1LL<<j))) continue;
+            if(!basis[j])
             {
-                if(!(x&(1LL<<j))) continue;
-                if(!basis[j])
-                {
-                    basis[j]=x;
-                    f=true;
-                    break;
-                }
-                else x^=basis[j];
+                basis[j]=x;
+                return;
             }
-            if(!f) return false;
+            else x^=basis[j];
         }
-        return true;
+    }
+    bool test(ll x)
+    {
+        for(int j=60;j>=0;j--)
+        {
+            if(!(x&(1LL<<j))) continue;
+            if(!basis[j]) return true; else x^=basis[j];
+        }
+        return false;
     }
 };
 struct ColorfulMatroid
 {
     int cnt[125];
-    bool test(vector<int> &v)
+    void clear()
     {
         memset(cnt,0,sizeof(cnt));
-        for(auto i:v)
-        {
-            cnt[color[i]]++;
-            if(cnt[color[i]]>1) return false;
-        }
-        return true;
+    }
+    void add(int x)
+    {
+        cnt[x]++;
+    }
+    bool test(int x)
+    {
+        return (cnt[x]==0);
     }
 };
 
@@ -58,7 +64,7 @@ struct MatroidIntersection
 {
     int n;
     MatroidIntersection(int _n):n(_n){}
-    int pre[MAXM];
+    int pre[MAXM],id[MAXM];
     bool vis[MAXM],sink[MAXM],has[MAXM];
     queue<int> que;
     void clear_all()
@@ -86,18 +92,29 @@ struct MatroidIntersection
         while(true)
         {
             vector<int> cur=getcur();
+            int cnt=0;
+            for(int i=1;i<=n;i++) if(has[i]) id[i]=cnt++;
+            MT1 allmt1; MT2 allmt2; allmt1.clear(); allmt2.clear();
+            vector<MT1> vmt1(cur.size()); vector<MT2> vmt2(cur.size());
+            for(auto &x:vmt1) x.clear(); for(auto &x:vmt2) x.clear();
             clear_all();
+            for(auto x:cur) allmt1.add(val[x]),allmt2.add(color[x]);
+            for(int i=0;i<(int)cur.size();i++)
+                for(int j=0;j<(int)cur.size();j++)
+                {
+                    if(i==j) continue;
+                    vmt1[i].add(val[cur[j]]);
+                    vmt2[i].add(color[cur[j]]);
+                }
             for(int i=1;i<=n;i++)
             {
                 if(has[i]) continue;
-                vector<int> tmp=cur; tmp.push_back(i);
-                if(mt1.test(tmp)) {que.push(i); vis[i]=true;}
+                if(allmt1.test(val[i])) {que.push(i); vis[i]=true;}
             }
             for(int i=1;i<=n;i++)
             {
                 if(has[i]) continue;
-                vector<int> tmp=cur; tmp.push_back(i);
-                if(mt2.test(tmp)) sink[i]=true;
+                if(allmt2.test(color[i])) sink[i]=true;
             }
             int last=-1;
             while(que.size())
@@ -108,11 +125,14 @@ struct MatroidIntersection
                 {
                     if(vis[i]) continue;
                     if(has[i]==has[v]) continue;
-                    has[v]^=1; has[i]^=1;
-                    vector<int> tmp=getcur();
-                    if(!has[v]) { if(mt1.test(tmp)) enqueue(i,v); }
-                    else {if(mt2.test(tmp)) enqueue(i,v);}
-                    has[v]^=1; has[i]^=1;
+                    if(has[v])
+                    {
+                        if(vmt1[id[v]].test(val[i])) enqueue(i,v);
+                    }
+                    else
+                    {
+                        if(vmt2[id[i]].test(color[v])) enqueue(i,v);
+                    }
                 }
             }
             if(last==-1) return cur;

@@ -8,7 +8,7 @@ using namespace std;
 typedef long long ll;
 typedef pair<int,int> P;
 int n,sg[2][2]={0,0,0,1};
-int Nim_Multi_Power(int x,int y)
+int nim_mult_pow(int x,int y)
 {
     if(x<2)
         return sg[x][y];
@@ -18,15 +18,15 @@ int Nim_Multi_Power(int x,int y)
             break;
     int m=1<<(1<<a);
     int p=x/m,s=y/m,t=y%m;
-    int d1=Nim_Multi_Power(p,s);
-    int d2=Nim_Multi_Power(p,t);
-    return (m*(d1^d2))^Nim_Multi_Power(m/2,d1);
+    int d1=nim_mult_pow(p,s);
+    int d2=nim_mult_pow(p,t);
+    return (m*(d1^d2))^nim_mult_pow(m/2,d1);
 }
 
-int Nim_Multi(int x,int y)
+int nim_mult(int x,int y)
 {
     if(x<y)
-        return Nim_Multi(y,x);
+        return nim_mult(y,x);
     if(x<2)
         return sg[x][y];
     int a=0;
@@ -35,13 +35,13 @@ int Nim_Multi(int x,int y)
             break;
     int  m=1<<(1<<a);
     int p=x/m,q=x%m,s=y/m,t=y%m;
-    int c1=Nim_Multi(p,s);
-    int c2=Nim_Multi(p,t)^Nim_Multi(q,s);
-    int c3=Nim_Multi(q,t);
-    return (m*(c1^c2))^c3^Nim_Multi_Power(m/2,c1);
+    int c1=nim_mult(p,s);
+    int c2=nim_mult(p,t)^nim_mult(q,s);
+    int c3=nim_mult(q,t);
+    return (m*(c1^c2))^c3^nim_mult_pow(m/2,c1);
 }
 int main()
 {
     int x,y;
-    while(scanf("%d%d",&x,&y)==2) printf("%d\n",Nim_Multi(x,y));
+    while(scanf("%d%d",&x,&y)==2) printf("%d\n",nim_mult(x,y));
 }

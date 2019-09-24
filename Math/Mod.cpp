@@ -48,6 +48,9 @@ int mod_comb(int n,int k,int p)
 }
 int main()
 {
+    inv[1] = 1;
+	for (int i = 2; i < MOD; i++)
+		inv[i] = (MOD - MOD / i) * inv[ MOD % i] % MOD;
     printf("%d\n",mod_inverse(22,31));
     return 0;
 }

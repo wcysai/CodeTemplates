@@ -10,17 +10,17 @@ int V;
 vector<edge> G[MAXV];
 void add_edge(int from,int to,int cap,int cost)
 {
-    G[from].push_back((edge){to,cap,cost,G[to].size()});
-    G[to].push_back((edge){from,0,-cost,G[from].size()-1});
+    G[from].push_back((edge){to,cap,cost,(int)G[to].size()});
+    G[to].push_back((edge){from,0,-cost,(int)G[from].size()-1});
 }
 int min_cost_flow(int s,int t,int f)
 {
     int res=0;
-    fill(h,h+V,0);
+    fill(h+1,h+V+1,0);
     while(f>0)
     {
         priority_queue<P,vector<P>,greater<P> >que;
-        fill(dist,dist+V,INF);
+        fill(dist+1,dist+V+1,INF);
         dist[s]=0;
         que.push(P(0,s));
         while(!que.empty())
@@ -44,7 +44,7 @@ int min_cost_flow(int s,int t,int f)
         {
             return -1;
         }
-        for(int v=0;v<V;v++) h[v]+=dist[v];
+        for(int v=1;v<=V;v++) h[v]+=dist[v];
         int d=f;
         for(int v=t;v!=s;v=prevv[v])
         {

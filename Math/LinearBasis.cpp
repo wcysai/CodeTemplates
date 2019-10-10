@@ -10,7 +10,7 @@ int main()
         int x=a[i];
         for(int j=60;j>=0;j--)
         {
-            if(x&(1<<j))
+            if(x&(1ll<<j))
             {
                 if(!bas[j])
                 {

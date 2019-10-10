@@ -1,18 +1,10 @@
-#include<cstdio>
-#include<cmath>
-#include<cstring>
-#include<cstdlib>
-#include<iostream>
-#include<algorithm>
-#include<queue>
-#include<vector>
-#define MAX_V 10000
-#define MAXN 1000000
+#include<bits/stdc++.h>
+#define MAXN 10005
 using namespace std;
 int V;
-vector<int> G[MAX_V];
-int match[MAX_V];
-bool used[MAX_V];
+vector<int> G[MAXN];
+int match[MAXN];
+bool used[MAXN];
 void add_edge(int u,int v)
 {
     G[u].push_back(v);
@@ -37,7 +29,7 @@ int bipartite_matching()
 {
     int res=0;
     memset(match,-1,sizeof(match));
-    for(int v=0;v<V;v++)
+    for(int v=1;v<=V;v++)
     {
         if(match[v]<0)
         {
@@ -49,9 +41,4 @@ int bipartite_matching()
         }
     }
     return res;
-}
-int main()
-{
-    int p=sieve(1000000);
-    return 0;
 }

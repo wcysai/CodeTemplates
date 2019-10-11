@@ -66,12 +66,3 @@ int max_flow(int s,int t)
           flow+=f;
     }
 }
-int main()
-{
-    scanf("%d",&V);
-    for(int i=0;i<V;i++)
-        for(int j=i+1;j<V;j++)
-            add_edge(i,j,i^j);
-    printf("%d\n",max_flow(0,V-1));
-    return 0;
-}

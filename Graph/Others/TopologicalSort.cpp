@@ -31,7 +31,3 @@ void toposort()
 		if(color[i]==0)
 			dfs_visit(i);
 }
-int main()
-{
-	return 0;
-}

@@ -36,7 +36,3 @@ int scc()
     for(int i=vs.size()-1;i>=0;i--) if(!used[vs[i]]) rdfs(vs[i],k++);
     return k;
 }
-int main()
-{
-    return 0;
-}

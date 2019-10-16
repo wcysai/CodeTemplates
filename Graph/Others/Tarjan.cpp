@@ -45,8 +45,4 @@ int tarjan()
     for(int i=1;i<=n;i++) if(!dfn[i]) dfs(i);
     return cnt;
 }
-int main()
-{
-    return 0;
-}
 

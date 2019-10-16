@@ -51,7 +51,3 @@ int dis(int u,int v)
 {
     return depth[u]+depth[v]-2*depth[lca(u,v)];
 }
-int main()
-{
-    return 0;
-}

@@ -61,16 +61,12 @@ void build_block_cut_tree()
         for(auto v:bcc[i])
         {
             if(!art[v]) id[v]=N;
-            else 
+            else
             {
                 tree[id[v]].push_back(N);
                 tree[N].push_back(id[v]);
             }
         }
     }
-}
-int main()
-{
-    return 0;
 }
 

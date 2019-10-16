@@ -1,7 +1,7 @@
 /*************************************************************************
     > File Name: ChordalGraph.cpp
     > Author: Roundgod
-    > Mail: wcysai@foxmail.com 
+    > Mail: wcysai@foxmail.com
     > Created Time: 2018-10-31 15:49:59
  ************************************************************************/
 
@@ -44,16 +44,5 @@ void MCS()
         }
     }
     reverse(peo.begin(),peo.end());
-}
-int main()
-{
-    scanf("%d%d",&n,&m);
-    for(int i=0;i<m;i++)
-    {
-        int u,v;scanf("%d%d",&u,&v);
-        G[u].push_back(v);G[v].push_back(u);
-    }
-    MCS();
-    return 0;
 }
 

@@ -36,7 +36,7 @@ void dfs1(int v,int edge)
         if(!dfn[to])
         {
             dfs1(to,e);
-            low[v]=min(low[v],low[to]); 
+            low[v]=min(low[v],low[to]);
         }
         else low[v]=min(low[v],dfn[to]);
     }
@@ -83,9 +83,4 @@ void build_bridge_tree()
         }
     }
 }
-int main()
-{
-    return 0;
-}
-
 

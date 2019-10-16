@@ -10,7 +10,7 @@ typedef pair<int,int> P;
 int n,k,a[MAXN];
 namespace ZL
 {
-	const int N=100010,M=100010,inf=1e9; 
+	const int N=100010,M=100010,inf=1e9;
 	struct edge
     {
 	    int u,v,w,use,id;
@@ -40,7 +40,7 @@ namespace ZL
 	        int cnt=0; In[root]=0;
 	        for (int i=1;i<=n;i++)
             {
-	            if (i!=root) a[h[i]].use++; 
+	            if (i!=root) a[h[i]].use++;
 	            int now=i; ans+=In[i];
 	            while (vis[now]==0&&now!=root)
                 {
@@ -61,7 +61,7 @@ namespace ZL
 	        for (int i=1;i<=m;i++)
             {
 	            int k1=In[b[i].v]; int k2=b[i].v;
-	            b[i].u=id[b[i].u]; b[i].v=id[b[i].v];       
+	            b[i].u=id[b[i].u]; b[i].v=id[b[i].v];
 	            if (b[i].u!=b[i].v)
                 {
 	                b[i].w-=k1; a[++len].u=b[i].id; a[len].v=h[k2];
@@ -83,8 +83,3 @@ namespace ZL
 		for (int i=1;i<=m;i++) way[i]=a[i].use;
 	}
 }
-int main()
-{
-    return 0;
-}
-

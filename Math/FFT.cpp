@@ -70,7 +70,7 @@ namespace fft
     }
 
     vector<num> fa,fb;
-    
+
     vector<int> multiply(vector<int> &a, vector<int> &b)
     {
         int need=a.size()+b.size()-1;
@@ -164,35 +164,3 @@ namespace fft
         return multiply_mod(a,a,m,1);
     }
 };
-string s1,s2;
-int main()
-{
-    cin>>s1;
-    cin>>s2;
-    int len1=(int)s1.size();
-    vector<int> v1(len1);
-    for(int i=0;i<len1;i++)
-        v1[i]=(int)(s1[len1-1-i]-'0');
-    int len2=(int)s2.size();
-    vector<int> v2(len2);
-    for(int i=0;i<len2;i++)
-        v2[i]=(int)(s2[len2-1-i]-'0');
-    vector<int> ans;
-    ans=fft::multiply(v1,v2);
-    int carry=0;
-    for(int i=0;i<(int)ans.size();i++)
-    {
-        carry+=ans[i];
-        ans[i]=carry%10;
-        carry/=10;
-    }
-    while(carry>0)
-    {
-        ans.push_back(carry%10);
-        carry/=10;
-    }
-    while((int)ans.size()>1&&ans.back()==0) ans.pop_back();
-    for(int i=(int)ans.size()-1;i>=0;i--)
-        printf("%d",ans[i]);
-    return 0;
-}

@@ -12,7 +12,6 @@ int st[MAXN],t;
 int fa[MAXN],ls[MAXN],rs[MAXN],root;
 int main()
 {
-    for(int i=1;i<=n;i++) scanf("%d",&h[i]);
     for(int i=1;i<=n;i++)
     {
         while(t&&h[st[t-1]]>h[i]) ls[i]=st[--t];

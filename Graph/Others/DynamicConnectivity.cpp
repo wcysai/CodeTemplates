@@ -1,19 +1,12 @@
-#pragma GCC optimize(3)
 #include<bits/stdc++.h>
-#include<ext/pb_ds/assoc_container.hpp>
-#include<ext/pb_ds/tree_policy.hpp>
-#include<ext/pb_ds/priority_queue.hpp>
 #define MAXN 300005
 #define INF 1000000000
 #define MOD 1000000007
 #define F first
 #define S second
 using namespace std;
-using namespace __gnu_pbds;
 typedef long long ll;
 typedef pair<int,int> P;
-typedef tree<int,null_type,less<int>,rb_tree_tag,tree_order_statistics_node_update> ordered_set;
-typedef __gnu_pbds::priority_queue<int,greater<int>,pairing_heap_tag> pq;
 int n,k,x,y;
 char str[2];
 vector<P> edges[4*MAXN];
@@ -47,9 +40,9 @@ bool unite(int x,int y)
     y=find(y);
     if(x==y) return false;
     num--;
-    if(r[x]<r[y]) 
+    if(r[x]<r[y])
     {
-        p[x]=y; 
+        p[x]=y;
         st[t++]=(update){x,y,false};
     }
     else
@@ -88,7 +81,7 @@ void solve(int k,int l,int r)
 {
     if(l>r) return;
     int cnt=0;
-    for(auto e:edges[k]) if(unite(e.F,e.S)) cnt++;  
+    for(auto e:edges[k]) if(unite(e.F,e.S)) cnt++;
     if(l==r)
     {
         if(ask[l]) ans[l]=num;
@@ -103,8 +96,6 @@ void solve(int k,int l,int r)
 map<P,int> mp;
 int main()
 {
-    freopen("connect.in","r",stdin);
-    freopen("connect.out","w",stdout);
     scanf("%d%d",&n,&k);num=n;init(n);
     memset(ask,false,sizeof(ask));
     for(int i=1;i<=k;i++)

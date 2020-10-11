@@ -23,7 +23,7 @@ int main()
         G[u].push_back(v);G[v].push_back(u);
         deg[v]++;deg[u]++;
     }
-    sort(a,a+n+1,cmp);
+    sort(a+1,a+n+1,cmp);
     for(int i=1;i<=n;i++) r[a[i]]=i;
     for(int i=1;i<=n;i++)
         for(auto to:G[i]) if(r[to]>r[i]) gr[i].push_back(to); 

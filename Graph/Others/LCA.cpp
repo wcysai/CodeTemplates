@@ -15,7 +15,7 @@ void dfs(int v,int p,int d)
 }
 void init(int V)
 {
-    dfs(1,0,0);
+    dfs(1,-1,0);
     for(int k=0;k+1<MAXLOGN;k++)
     {
         for(int v=1;v<=V;v++)

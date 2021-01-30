@@ -24,6 +24,7 @@ void dfs(int v,int p,int &tot)
     st[t++]=v;
     for(auto to:G[v])
     {
+        if(to==p) continue;
         if(!dfn[to])
         {
             dfs(to,v,tot);

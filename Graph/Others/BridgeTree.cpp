@@ -32,6 +32,7 @@ void dfs1(int v,int edge)
     st[t++]=v;
     for(auto e:G[v])
     {
+        if(e==edge) continue;
         int to=adj(v,e);
         if(!dfn[to])
         {

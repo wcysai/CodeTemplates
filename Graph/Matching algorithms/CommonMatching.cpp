@@ -101,6 +101,7 @@ bool find(int x)
 
 void matching()
 {
+    ans=0;
     for(int i=1;i<=n;i++)
         if(match[i]==0)
         {

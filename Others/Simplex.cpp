@@ -11,6 +11,11 @@ typedef pair<int,int> P;
 typedef double db;
 typedef vector<db> vec;
 typedef vector<vec> mat;
+//usage:
+//minimize cx, where x is a vector of length n, with m constraints
+//feed in m+1 lines
+//first line contains (0,c)
+//each of the next lines describe an inequality ax<=b in the form of (b,a)
 const db eps=1e-8;
 bool eq(db a,db b)
 {
@@ -38,7 +43,7 @@ vec simplex(mat a)
             a[x][j]/=k;
             if(!eq(a[x][j],0)) vct.push_back(j);
         }
-        for(int i=0;i<=n;i++) 
+        for(int i=0;i<=n;i++)
         {
             if(eq(a[i][y],0)||i==x) continue;
             k=a[i][y];

@@ -34,7 +34,7 @@ void dfs(int v,int p,int &tot)
                 art[v]=(dfn[v]>1||dfn[to]>2);
                 bcc_cnt++;
                 bcc[bcc_cnt].push_back(v); bccno[v]=bcc_cnt;
-                while(bcc[bcc_cnt].back()!=v)
+                while(bcc[bcc_cnt].back()!=to)
                 {
                     bccno[st[t-1]]=bcc_cnt;
                     bcc[bcc_cnt].push_back(st[t-1]),t--;

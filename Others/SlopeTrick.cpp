@@ -3,8 +3,8 @@ struct SlopeTrick
 {
     const T INF = numeric_limits<T>::max()/3;
     T min_f;
-    priority_queue<T,vector<T>,less<> > L;
-    priority_queue<T,vector<T>,greater<> > R;
+    priority_queue<T,vector<T>,less<T> > L;
+    priority_queue<T,vector<T>,greater<T> > R;
     T add_l,add_r;
     void push_R(const T& a) 
     {
@@ -139,4 +139,3 @@ struct SlopeTrick
         min_f+=st.min_f;
     }
 };
-}

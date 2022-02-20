@@ -1,121 +1,120 @@
 #include<bits/stdc++.h>
-#define MAXN 50030
+#define MAXN 500005
 #define INF 1000000000
+#define F first
+#define S second
+#define ls t[o].ch[0]
+#define rs t[o].ch[1]
 using namespace std;
-struct treap
+typedef long long ll;
+typedef pair<int,int> P;
+mt19937_64 rng(std::chrono::system_clock::now().time_since_epoch().count());
+struct node
 {
-    int root,treapcnt,key[MAXN],priority[MAXN],childs[MAXN][2],cnt[MAXN],size[MAXN];
-    treap()
+    int ch[2],sz,val,lazy,pri,maxi;
+};
+namespace treap
+{
+    int root,tot;
+    node t[MAXN];
+    void init()
     {
         root=0;
-        treapcnt=1;
-        priority[0]=INF;
-        size[0]=0;
+        t[root].ch[0]=t[root].ch[1]=0;
+        tot=0;
     }
-
-
-    void update(int x)
+    int newnode(int val)
     {
-        size[x]=size[childs[x][0]]+cnt[x]+size[childs[x][1]];
+        tot++;
+        t[tot].val=val; t[tot].ch[0]=t[tot].ch[1]=0;
+        t[tot].sz=1; t[tot].pri=rng(); t[tot].maxi=t[tot].lazy=0;
+        return tot;
     }
-
-    void rotate(int &x,int t)
+    void pushup(int o)
     {
-        int y=childs[x][t];
-        childs[x][t]=childs[y][1-t];
-        childs[y][1-t]=x;
-        update(x);
-        update(y);
-        x=y;
+        t[o].sz=t[ls].sz+t[rs].sz+1;
+        t[o].maxi=max(t[ls].maxi,t[rs].maxi);
     }
-
-    void _insert(int &x,int k)
+    void add(int o,int v)
     {
-        if(x)
+        if(!o) return;
+        t[o].maxi+=v; t[o].lazy+=v;
+    }
+    void pushdown(int o)
+    {
+        if(!t[o].lazy) return;
+        add(ls,t[o].lazy); add(rs,t[o].lazy);
+        t[o].lazy=0;
+    }
+    P split(int o,int cnt)
+    {
+        if(!o) return P(0,0);
+        pushdown(o);
+        if(t[ls].sz>=cnt)
         {
-            if(key[x]==k)
-            {
-                cnt[x]++;
-            }
-            else
-            {
-                int t=key[x]<k;
-                _insert(childs[x][t],k);
-                if(priority[childs[x][t]]<priority[x])
-                    {
-                    rotate(x,t);
-                }
-            }
+            P p=split(ls,cnt);
+            int tl=p.F,tr=p.S;
+            ls=tr; pushup(o);
+            return P(tl,o);
         }
         else
         {
-            x=treapcnt++;
-            key[x]=k;
-            cnt[x]=1;
-            priority[x]=rand();
-            childs[x][0]=childs[x][1]=0;
+            P p=split(rs,cnt-t[ls].sz-1);
+            int tl=p.F,tr=p.S;
+            rs=tl; pushup(o);
+            return P(o,tr);
         }
-        update(x);
     }
-
-    void _erase(int &x,int k)
+    int merge(int x,int y)
     {
-        if(key[x]==k)
+        if(!x||!y) return x+y;
+        if(t[x].pri<t[y].pri)
         {
-            if(cnt[x]>1)
-            {
-                cnt[x]--;
-            }
-            else
-            {
-                if(childs[x][0]==0&&childs[x][1]==0)
-                {
-                    x=0;
-                    return;
-                }
-                int t=priority[childs[x][0]]>priority[childs[x][1]];
-                rotate(x,t);
-                _erase(x,k);
-            }
+            pushdown(x);
+            t[x].ch[1]=merge(t[x].ch[1],y);
+            pushup(x);
+            return x;
         }
         else
         {
-            _erase(childs[x][key[x]<k],k);
+            pushdown(y);
+            t[y].ch[0]=merge(x,t[y].ch[0]);
+            pushup(y);
+            return y;
         }
-        update(x);
     }
-
-    int _getKth(int &x,int k)
+    void ins(int val)
     {
-        if(k<=size[childs[x][0]])
-        {
-            return _getKth(childs[x][0],k);
-        }
-        k-=size[childs[x][0]]+cnt[x];
-        if(k<=0)
-        {
-            return key[x];
-        }
-        return _getKth(childs[x][1],k);
+        P p=split(root,val);
+        int tl=p.F,tr=p.S;
+        root=merge(merge(tl,newnode(val)),tr);
     }
-
-    void insert(int k)
+    void print(int o)
     {
-        _insert(root,k);
-    }
-
-    void erase(int k)
-    {
-        _erase(root,k);
-    }
-
-    int getKth(int k)
-    {
-        return _getKth(root,k);
+        if(!o) return;
+        print(ls);
+        printf("%d ",t[o].val);
+        print(rs);
     }
 };
-
+using namespace treap;
+int n,a,b;
 int main()
 {
+    scanf("%d",&n);
+    init();
+    for(int i=1;i<=n;i++) ins(i);
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d%d",&a,&b);
+        if(a>=b) continue;
+        int len=min(b-a,n-b+1);
+        P p1=split(root,a-1);
+        P p2=split(p1.S,len);
+        P p3=split(p2.S,b-a-len);
+        P p4=split(p3.S,len);
+        root=merge(p1.F,merge(p4.F,merge(p3.F,merge(p2.F,p4.S))));
+    }
+    print(root);
     return 0;
 }

@@ -1,68 +1,98 @@
 #include<bits/stdc++.h>
 #define MAXN 105
 using namespace std;
-const double eps=1e-8;
-typedef vector<double> vec;
-typedef vector<vec> mat;
 int sz;
-vec gauss_jordan(const mat& A, const vec& b)
+const double eps=1e-9;
+bool IsZero(double v) 
 {
-    int n=A.size();
-    mat B(n,vec(n+1));
-    for(int i=0;i<n;i++)
-        for(int j=0;j<n;j++)
-            B[i][j]=A[i][j];
-
-    for(int i=0;i<n;i++) B[i][n]=b[i];
-    for(int i=0;i<n;i++)
+    return abs(v)<eps;
+}
+enum GAUSS_MODE {
+  DEGREE, ABS
+};
+template <typename T>
+void GaussianElimination(vector<vector<T>>&a, int limit, GAUSS_MODE mode=DEGREE) 
+{
+    if(a.empty()||a[0].empty()) return;
+    int h=static_cast<int>(a.size());
+    int w=static_cast<int>(a[0].size());
+    vector<int> deg(h);
+    for(int i=0;i<h;i++) 
+        for(int j=0;j<w;j++) 
+            deg[i]+=!IsZero(a[i][j]);
+    int r=0;
+    for(int c=0;c<limit;c++) 
     {
-        int pivot=i;
-        for(int j=i;j<n;j++)
-            if(abs(B[j][i])>abs(B[pivot][i])) pivot=j;
-        swap(B[i],B[pivot]);
-        if(abs(B[i][i])<eps) return vec();
-        for(int j=i+1;j<=n;j++) B[i][j]/=B[i][i];
-        for(int j=0;j<n;j++)
+        int id=-1;
+        for(int i=r;i<h;i++) 
+            if(!IsZero(a[i][c])&&(id==-1||(mode==DEGREE&&deg[i]<deg[id])||(mode==ABS&&abs(a[id][c])<abs(a[i][c]))))
+                id=i;
+        if(id==-1) continue;
+        if(id>r) 
         {
-            if(i!=j)
+            swap(a[r],a[id]); swap(deg[r],deg[id]);
+            for(int j=c;j<w;j++) a[id][j]=-a[id][j];
+        }
+        vector<int> nonzero;
+        for(int j=c;j<w;j++) 
+            if(!IsZero(a[r][j])) 
+                nonzero.push_back(j);
+        T inv_a=1/a[r][c];
+        for(int i=r+1;i<h;i++) 
+        {
+            if(IsZero(a[i][c])) 
+                continue;
+            T coeff=-a[i][c]*inv_a;
+            for (int j:nonzero) 
             {
-                for(int k=i+1;k<=n;k++)
-                    B[j][k]-=B[j][i]*B[i][k];
+                if (!IsZero(a[i][j])) deg[i]--;
+                a[i][j] += coeff * a[r][j];
+                if (!IsZero(a[i][j])) deg[i]++;
             }
         }
+        ++r;
     }
-    vec x(n);
-    for(int i=0;i<n;i++)
-        x[i]=B[i][n];
-    return x;
-}
-int main()
-{
-    scanf("%d",&sz);
-    mat A(sz,vec(sz));
-    vec b(sz);
-    for(int i=0;i<sz;i++)
-        for(int j=0;j<sz;j++)
-            A[i][j]=0;
-    for(int i=0;i<sz;i++)
+    for(r=h-1;r>=0;r--) 
     {
-        double x;
-        int cnt=0;
-        while(scanf("%lf",&x)==1)
+        for(int c=0;c<limit;c++) 
         {
-            if(x==-1) break;
-            A[x-1][i]=1.0;
+            if(!IsZero(a[r][c])) 
+            {
+                T inv_a=1/a[r][c];
+                for(int i=r-1;i>=0;i--) 
+                {if (IsZero(a[i][c])) {
+            continue;
+          }
+          T coeff = -a[i][c] * inv_a;
+          for (int j = c; j < w; j++) {
+            a[i][j] += coeff * a[r][j];
+          }
         }
+        break;
+      }
     }
-    for(int i=0;i<sz;i++)
-        b[i]=1.0;
-    vec res=gauss_jordan(A,b);
-    if(res==vec()) printf("No solution\n");
-    else
-    {
-        for(int i=0;i<sz;i++)
-            if(res[i]>0) printf("%d ",i+1);
-        printf("\n");
+  }
+}
+ 
+template <typename T>
+vector<T> SolveLinearSystem(vector<vector<T>> a, const vector<T>& b, int w) {
+  int h = static_cast<int>(a.size());
+  assert(h == static_cast<int>(b.size()));
+  if (h > 0) {
+    assert(w == static_cast<int>(a[0].size()));
+  }
+  for (int i = 0; i < h; i++) {
+    a[i].push_back(b[i]);
+  }
+  GaussianElimination(a, w);
+  vector<T> x(w, 0);
+  for (int i = 0; i < h; i++) {
+    for (int j = 0; j < w; j++) {
+      if (!IsZero(a[i][j])) {
+        x[j] = a[i][w] / a[i][j];
+        break;
+      }
     }
-    return 0;
+  }
+  return x;
 }

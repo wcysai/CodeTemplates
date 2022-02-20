@@ -68,18 +68,22 @@ void spfa(int s)
         inque[u]=false;
     }
 }
-ll min_cost_flow(int s,int t,int f)
+ll min_cost_flow(int s,int t)
 {
     ll res=0;
     spfa(s);
-    while(f>0)
+    while(true)
     {
         dijkstra(s);
-        if(dist[t]==INF) return -1;
-        int d=f;
-        for(int v=t;v!=s;v=prevv[v]) d=min(d,G[prevv[v]][preve[v]].cap);
-        f-=d;
-        res+=1LL*d*dist[t];
+        if(dist[t]==INF) return res;
+        if(h[t]+dist[t]>=0) return res;
+        for(int v=1;v<=V;v++) h[v]+=dist[v];
+        int d=V;
+        for(int v=t;v!=s;v=prevv[v])
+        {
+            d=min(d,G[prevv[v]][preve[v]].cap);
+        }
+        res+=d*h[t];
         for(int v=t;v!=s;v=prevv[v])
         {
             edge &e=G[prevv[v]][preve[v]];
@@ -87,5 +91,4 @@ ll min_cost_flow(int s,int t,int f)
             G[v][e.rev].cap+=d;
         }
     }
-    return res;
 }

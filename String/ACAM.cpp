@@ -1,125 +1,53 @@
 #include<bits/stdc++.h>
 #define MAXN 50020
+#define MAXC 26
 using namespace std;
-struct trie
+struct aho_corasick 
 {
-    trie* next[26];
-    trie* fail;
-    bool mark;
-};
-trie* thead;
-char str[MAXN][1001];
-inline trie*  newnode()
-{
-    trie* t;
-    t=(trie*)malloc(sizeof(trie));
-    t->fail=NULL;
-    t->mark=false;
-    memset(t,0,sizeof(trie));
-    return t;
-}
-void insert(char x[])
-{
-    int i;
-    trie* s=thead;
-    trie* t;
-    for(i=0;x[i];i++)
+    int cnt=0,kmp[MAXN],ch[MAXN][MAXC],nxt[MAXN][MAXC];
+    long long dp[MAXN];
+ 
+    void add(string &s,int c) 
     {
-        if(s->next[x[i]-'a']) {s=s->next[x[i]-'a'];}
-        else
+        int cur=0;
+        for(char &c:s) 
         {
-            t=newnode();
-            s->next[x[i]-'a']=t;
-            s=t;
+            if(ch[cur][c-'a']==0) ch[cur][c-'a']=++cnt;
+            cur=ch[cur][c-'a'];
         }
+        dp[cur]+=c;
     }
-    s->mark=true;
-    return;
-}
-trie* g(trie* s, char x)
-{
-    if(s->next[x-'a']) return s->next[x-'a'];
-    else if(s==thead) return thead;
-    else return NULL;
-}
-
-void bfs()
-{
-    trie* s=thead;
-    queue<trie*> que;
-    for(int i=0;i<26;i++)
-        if(s->next[i]){s->next[i]->fail=thead; que.push(s->next[i]);}
-    while(!que.empty())
+ 
+    void BFS() 
     {
-        trie* t=que.front();
-        que.pop();
-        for(int i=0;i<26;i++)
-            if(g(t,(char)('a'+i))!=NULL)
+        queue<int> q;
+        for(q.push(0);!q.empty();q.pop()) 
+        {
+            int u=q.front();
+            dp[u]+=dp[kmp[u]];
+            for(int i=0;i<MAXC;i++) 
             {
-                que.push(t->next[i]);
-                trie* v=t->fail;
-                while(g(v,(char)('a'+i))==NULL) v=v->fail;
-                t->next[i]->fail=g(v,(char)('a'+i));
+                if(ch[u][i]>0) 
+                {
+                    int v=ch[u][i];
+                    q.push(v);
+                    nxt[u][i]=v;
+                    kmp[v]=nxt[kmp[u]][i];
+                    if (kmp[v]==v) kmp[v]=0;
+                } 
+                else nxt[u][i]=nxt[kmp[u]][i];
             }
-    }
-    return;
-}
-int match(char x[])
-{
-    trie* s=thead;
-    int cnt=0;
-    for(int i=0;x[i];i++)
-    {
-        while(g(s,x[i])==NULL)
-        {
-            s=s->fail;
-            if(s->mark) cnt++;
         }
-        s=g(s,x[i]);
-        if(s->mark) cnt++;
     }
-     while(s->fail!=thead)
-     {
-        s=s->fail;
-        if(s->mark) cnt++;
-     }
-    return cnt;
-}
-bool find(char x[])
-{
-    trie* s=thead;
-    for(int i=0;x[i];i++)
+ 
+    pair<long long,int> traverse(string s,int st) 
     {
-        if(s->next[x[i]-'a']==NULL) return false;
-        s=s->next[x[i]-'a'];
+        long long ret=0;
+        for (char &c:s) 
+        {
+            st=nxt[st][c-'a'];
+            ret+=dp[st];
+        }
+        return {ret,st};
     }
-    return true;
-}
-void deltrie(trie* s)
-{
-    int i;
-    for(i=0;i<26;i++)
-    {
-        if(s->next[i])
-        deltrie(s->next[i]);
-    }
-    free(s);
-    s=NULL;
-}
-int main()
-{
-    int i=0;
-    thead=newnode();
-    while(scanf("%s",str[i])==1)
-    {
-        if(str[i][0]=='1') break;
-        insert(str[i]);
-        i++;
-    }
-    bfs();
-    char p[100];
-    scanf("%s",p);
-    printf("%d\n",match(p));
-    deltrie(thead);
-    return 0;
-}
+} acs;

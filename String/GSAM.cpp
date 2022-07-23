@@ -43,12 +43,12 @@ struct GSAM
         int r=edges.size()-1;
         while(p>=0&&edges[p].find(ch)==edges[p].end()) 
         {
-            edges[p][s[i]]=r;
+            edges[p][ch]=r;
             p=link[p];
         }
         if(p!=-1) 
         {
-            int q=edges[p][s[i]];
+            int q=edges[p][ch];
             if(length[p]+1==length[q]) link[r]=q;
             else 
             {

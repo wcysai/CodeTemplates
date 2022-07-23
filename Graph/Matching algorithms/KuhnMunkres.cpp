@@ -31,7 +31,7 @@ ll km(int n,int m)
                     if(cur<minv[j]) minv[j]=cur,way[j]=j0;
                     if(minv[j]<delta) delta=minv[j],j1=j;
                 }
-            for(int j=0;j<=m;++j) if(used[j]) u[p[j]]+=delta,v[j]-=delta; else minv[j]-=delta;
+            for(int j=1;j<=m;++j) if(used[j]) u[p[j]]+=delta,v[j]-=delta; else minv[j]-=delta;
             j0=j1;
         }while(p[j0]!=0);
         do 

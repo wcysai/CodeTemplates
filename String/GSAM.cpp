@@ -19,7 +19,6 @@ struct GSAM
         edges.push_back(map<char,int>());
         link.push_back(-1);
         length.push_back(0);
-        last=0;
     }
     int add(int p,char ch) 
     {
@@ -28,7 +27,7 @@ struct GSAM
             int q=edges[p][ch];
             if(length[p]+1==length[q]) return q;
             edges.push_back(edges[q]); 
-            length.push_back(length[p]+1); link.push_back(0);
+            length.push_back(length[p]+1); 
             int qq=edges.size()-1; 
             while(p>=0&&edges[p][ch]==q)
             {

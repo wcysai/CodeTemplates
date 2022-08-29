@@ -1,34 +1,36 @@
 #include<bits/stdc++.h>
 #define MAXN 1005
 using namespace std;
-int n,k;
-int r[MAXN+1];
-int sa[MAXN],lcp[MAXN];
-int c[MAXN],t1[MAXN],t2[MAXN];
+int sa[MAXN],rk[MAXN],oldrk[MAXN*2],id[MAXN],px[MAXN],c[MAXN];
 string S;
-void construct_sa(string S,int *sa) 
+bool cmp(int x,int y,int w)
 {
-    int n=S.length()+1;
+    return oldrk[x]==oldrk[y]&&oldrk[x+w]==oldrk[y+w];
+}
+void construct_sa(string S) 
+{
+    int n=S.length();
     int m=130;
-    int i,*x=t1,*y=t2;
-    for(i=0;i<m;i++) c[i]=0;
-    for(i=0;i<n;i++) c[x[i]=S[i]]++;
-    for(i=1;i<m;i++) c[i]+=c[i-1];
-    for(i=n-1;i>=0;i--) sa[--c[x[i]]]=i;
-    for(int k=1;k<=n;k<<=1) {
-        int p=0;
-        for(i=n-k;i<n;i++) y[p++]=i;
-        for(i=0;i<n;i++) if(sa[i]>=k) y[p++]=sa[i]-k;
-        for(i=0;i<m;i++) c[i]=0;
-        for(i=0;i<n;i++) c[x[y[i]]]++;
-        for(i=0;i<m;i++) c[i]+=c[i-1];
-        for(i=n-1;i>=0;i--) sa[--c[x[y[i]]]]=y[i];
-        swap(x,y);
-        p=1; x[sa[0]]=0;
-        for(i=1;i<n;i++) 
-            x[sa[i]]=y[sa[i]]==y[sa[i-1]] && y[sa[i]+k]==y[sa[i-1]+k]?p-1:p++;
-        if(p>=n) break;
-        m=p;
+    int i,p,w;
+    for(i=1;i<=n;i++) c[i]=0;
+    for(i=1;i<=n;i++) ++c[rk[i]=S[i-1]];
+    for(i=1;i<=m;i++) c[i]+=c[i-1];
+    for(i=n;i>=1;i--) sa[c[rk[i]]--]=i;
+    for(w=1;;w<<=1,m=p) {
+        for(p=0,i=n;i>n-w;i--) id[++p]=i;
+        for(i=1;i<=n;i++) if(sa[i]>w) id[++p]=sa[i]-w;
+        memset(c,0,sizeof(c));
+        for(i=1;i<=n;i++) ++c[px[i]=rk[id[i]]];
+        for(i=1;i<=m;i++) c[i]+=c[i-1];
+        for(i=n;i>=1;i--) sa[c[px[i]]--]=id[i];
+        memcpy(oldrk,rk,sizeof(rk));
+        for(p=0,i=1;i<=n;i++)
+            rk[sa[i]]=cmp(sa[i],sa[i-1],w)?p:++p;
+        if(p==n){
+            for(int i=1;i<=n;i++) rk[i-1]=rk[i]-1;;
+            for(int i=0;i<n;i++) sa[rk[i]]=i;
+            break;
+        }
     }
 }
 void construct_lcp(string S,int *sa,int *lcp)

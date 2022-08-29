@@ -60,18 +60,17 @@ void GaussianElimination(vector<vector<T>>&a, int limit, GAUSS_MODE mode=DEGREE)
             {
                 T inv_a=1/a[r][c];
                 for(int i=r-1;i>=0;i--) 
-                {if (IsZero(a[i][c])) {
-            continue;
-          }
-          T coeff = -a[i][c] * inv_a;
-          for (int j = c; j < w; j++) {
-            a[i][j] += coeff * a[r][j];
-          }
+                {
+                  if (IsZero(a[i][c])) continue;
+                  T coeff = -a[i][c] * inv_a;
+                  for (int j = c; j < w; j++) {
+                      a[i][j] += coeff * a[r][j];
+                  }
+                }
+              break;
+            }
         }
-        break;
-      }
     }
-  }
 }
  
 template <typename T>
@@ -89,7 +88,7 @@ vector<T> SolveLinearSystem(vector<vector<T>> a, const vector<T>& b, int w) {
   for (int i = 0; i < h; i++) {
     for (int j = 0; j < w; j++) {
       if (!IsZero(a[i][j])) {
-        x[j] = a[i][w] / a[i][j];
+        x[j] = a[i][w] / a[i][j]; 
         break;
       }
     }

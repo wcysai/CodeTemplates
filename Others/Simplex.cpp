@@ -12,7 +12,7 @@ typedef double db;
 typedef vector<db> vec;
 typedef vector<vec> mat;
 //usage:
-//minimize cx, where x is a vector of length n, with m constraints
+//maximize cx, where x is a vector of length n, with m constraints
 //feed in m+1 lines
 //first line contains (0,c)
 //each of the next lines describe an inequality ax<=b in the form of (b,a)
@@ -30,8 +30,8 @@ vec simplex(mat a)
     int n=(int)a.size()-1;
     int m=(int)a[0].size()-1;
     vec left(n+1),up(m+1);
-    iota(up.begin(),up.end(),0);
-    iota(left.begin(),left.end(),m);
+    iota(up.begin(),up.end(),1);
+    iota(left.begin(),left.end(),m+1);
     auto pivot=[&](int x,int y)
     {
         swap(left[x],up[y]);
@@ -46,9 +46,9 @@ vec simplex(mat a)
         for(int i=0;i<=n;i++)
         {
             if(eq(a[i][y],0)||i==x) continue;
-            k=a[i][y];
+            db coef=a[i][y];
             a[i][y]=0;
-            for(int j:vct) a[i][j]-=k*a[x][j];
+            for(int j:vct) a[i][j]-=coef*a[x][j];
         }
     };
     while(1)
@@ -64,14 +64,14 @@ vec simplex(mat a)
     while(1)
     {
         int y=-1;
-        for(int j=1;j<m;j++) if(ls(0,a[0][j])&&(y==-1||a[0][j]>a[0][y])) y=j;
+        for(int j=1;j<=m;j++) if(ls(0,a[0][j])&&(y==-1||a[0][j]>a[0][y])) y=j;
         if(y==-1) break;
         int x=-1;
         for(int i=1;i<=n;i++) if(ls(0,a[i][y])&&(x==-1||a[i][0]/a[i][y]<a[x][0]/a[x][y])) x=i;
         assert(x!=-1);
         pivot(x,y);
     }
-    vector<double> ans(m+1);
+    vector<db> ans(m+1);
     for(int i=1;i<=n;i++) if(left[i]<=m) ans[left[i]]=a[i][0];
     ans[0]=-a[0][0];
     return ans;

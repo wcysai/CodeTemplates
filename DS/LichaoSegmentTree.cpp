@@ -16,7 +16,7 @@ ll f(P p,int x)
 void insert(int &k,int l,int r,int x,int y,P p)
 {
     if(l>y||x>r) return;
-    k=++tot;
+    if(!k) k=++tot;
     has[k]=false;
     if(l>=x&&r<=y)
     {
